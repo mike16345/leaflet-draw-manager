@@ -18,7 +18,7 @@ class DrawLineVertices extends DrawVertices {
    */
   constructor(map: L.Map, shapeType: Shapes | string = "") {
     super(map, shapeType);
-    this.displayDistances = false;
+    this.displayDistances = true;
   }
 
   /**
@@ -30,10 +30,14 @@ class DrawLineVertices extends DrawVertices {
     const vertexMarker = L.marker(latLng, {
       draggable: true,
       icon: L.divIcon({
-        className: "hit-box vertex-marker z-[1250]",
+        className: "hit-box vertex-marker",
         html: `${index + 1}`,
         iconSize: L.point(24, 24),
       }),
+    });
+
+    vertexMarker.on("dragstart", () => {
+      this.handleTouchStart();
     });
 
     vertexMarker.on("drag", (e: any) => {
@@ -46,6 +50,7 @@ class DrawLineVertices extends DrawVertices {
       if (this.handleOnDragEnd) {
         this.handleOnDragEnd();
       }
+      this.handleTouchEnd();
     });
 
     vertexMarker.addTo(this.vertices);
@@ -90,7 +95,7 @@ class DrawLineVertices extends DrawVertices {
     const midpointMarker = L.marker(midpoint, {
       draggable: true,
       icon: L.divIcon({
-        className: "hit-box vertex-marker opacity-60 z-[1250]",
+        className: "hit-box vertex-marker midpoint-marker",
         iconSize: L.point(20, 20),
       }),
     });
@@ -102,12 +107,15 @@ class DrawLineVertices extends DrawVertices {
       midpointMarker
         .bindTooltip(tooltipContent, {
           permanent: true,
-          className: ` bg-black/80 z-[1300] border-none text-center h-7 shadow-none 
-                       rounded-xl text-gray-200  text-2xs pointer-events-none font-black `,
+          className: `distance-tooltip`,
           direction: "auto",
         })
         .addTo(this.map);
     }
+
+    midpointMarker.on("dragstart", () => {
+      this.handleTouchStart();
+    });
 
     midpointMarker.on("drag", (e: any) => {
       if (!this.isDragging) {
@@ -136,14 +144,9 @@ class DrawLineVertices extends DrawVertices {
       if (this.handleOnDragEnd) {
         this.handleOnDragEnd();
       }
+      this.handleTouchEnd();
     });
     midpointMarker.addTo(this.midpointVertices);
-
-    const eventTarget = midpointMarker.getElement();
-    if (!eventTarget) return;
-
-    eventTarget.addEventListener("touchstart", () => this.handleTouchStart());
-    eventTarget.addEventListener("touchend", () => this.handleTouchEnd());
   }
 
   /**
@@ -302,8 +305,6 @@ class DrawLineVertices extends DrawVertices {
    */
   handleMapClick(e: LeafletMouseEvent) {
     super.handleMapClick(e);
-    console.log("adding vertex ", e.latlng);
-    console.log("latlngs", this.latLngs);
     this.drawVertex(e.latlng, this.latLngs.length - 1);
     this.drawMidpointVertices();
   }

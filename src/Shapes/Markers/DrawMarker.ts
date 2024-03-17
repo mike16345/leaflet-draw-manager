@@ -80,7 +80,6 @@ class DrawMarker extends DrawShape<L.Marker> {
   editShape(marker: L.Marker) {
     this.currentShape = marker;
     this.shapeOptions = marker.options;
-    console.log("shape options", this.shapeOptions);
     this.isDraggable = true;
 
     marker.dragging?.enable();
@@ -137,8 +136,8 @@ class DrawMarker extends DrawShape<L.Marker> {
       ...this.shapeOptions,
       draggable: this.isDraggable,
       icon: L.divIcon({
-        className: "border-none flex items-center justify-center",
-        html: `<input id="text-input" dir="rtl" class=" w-48 h-12 focus:bg-white text-center placeholder:text-center  placeholder:text-black border-none rounded-xl bg-white/80 font-medium text-xl" placeholder="הזן טקסט כאן" value="${
+        className: "text-marker",
+        html: `<input id="text-input" dir="rtl" class="text-marker-input" placeholder="הזן טקסט כאן" value="${
           this.shapeOptions.text ? this.shapeOptions.text : ""
         }"/>`,
       }),

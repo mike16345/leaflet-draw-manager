@@ -164,7 +164,6 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    * @param e The event containing the dragged vertex.
    */
   handleDragVertex(e: any): void {
-    console.log("dragging vertex", e.latlng);
     this.latLngs[1] = e.latlng;
     this.redrawShape();
   }
@@ -208,8 +207,6 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
   drawShape(latLngs: L.LatLng[] | null = null) {
     const firstPoint = (latLngs && latLngs[0]) || this.latLngs[0];
     const secondPoint = (latLngs && latLngs[1]) || this.latLngs[1];
-    console.log("firstPoint", firstPoint);
-    console.log("secondPoint", secondPoint);
     const distance = firstPoint.distanceTo(secondPoint);
 
     const circle = L.circle(

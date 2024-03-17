@@ -52,7 +52,6 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.latLngs = [...this.preEditLatLngs];
     this.redrawShape();
     if (this.onCancelEditHandler) {
-      console.log("Cancelled custom");
       this.onCancelEditHandler(this.currentShape);
     }
     this.onFinishHandler = null;
@@ -159,9 +158,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
   }
   override setShapeOptions(options: L.PolylineOptions): void {
     if (!this.currentShape) return;
-    console.log("current shape options: ", this.currentShape.options);
     this.currentShape.options = options;
-    console.log("current shape options: ", this.currentShape.options);
   }
 
   initDrawEvents(): void {

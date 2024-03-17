@@ -1,24 +1,67 @@
 .vertex-marker {
-  color: #fff;
+  color: #fff !important;
   font-size: 14px;
-  text-align: center;
-  align-self: center;
-  background-color: #000000;
-  vertical-align: bottom;
+  text-align: center !important;
+  align-self: center !important;
+  background-color: #000000 !important;
+  vertical-align: bottom !important;
   /* filter: drop-shadow(-2px -1px 0px rgb(42, 42, 42))
       drop-shadow(1px -1px 0px rgb(42, 42, 42))
       drop-shadow(2px 1px 0px rgb(42, 42, 42))
       drop-shadow(-1px 1px 0px rgb(42, 42, 42)); */
-  border-radius: 30px;
-  border-width: 4px;
-  border: 2px solid #fff;
-  font-weight: bolder;
-  font-family: "Segoe UI", sans-serif;
-  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  border-radius: 30px !important;
+  border-width: 4px !important;
+  border: 2px solid #fff !important;
+  font-weight: bolder !important;
+  font-family: "Segoe UI", sans-serif !important;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000 !important;
+}
+
+.text-marker {
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.text-marker-input {
+  width: 12rem; /* Adjust the width value as needed */
+  height: 3rem; /* Adjust the height value as needed */
+  background-color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  border: none;
+  border-radius: 0.75rem; /* Adjust the border-radius value as needed */
+  font-weight: 500; /* Adjust the font-weight value as needed */
+  font-size: 1.5rem; /* Adjust the font-size value as needed */
+}
+
+.text-marker-input:focus {
+  background-color: #fff;
+}
+
+.text-marker-input::placeholder {
+  color: #000;
+  text-align: center;
 }
 
 .midpoint-marker {
   opacity: 65%;
+}
+
+.distance-tooltip {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  z-index: 1300 !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-style: none !important;
+  text-align: center !important;
+  height: 1.5rem !important; /* Adjust the height value as needed */
+  box-shadow: none !important;
+  border-radius: 0.75rem !important; /* Adjust the border-radius value as needed */
+  color: #e5e7eb !important; /* Adjust the text color value as needed */
+  font-size: 0.625rem !important; /* Adjust the font-size value as needed */
+  pointer-events: none !important;
+  font-weight: 900 !important;
 }
 
 .leaflet-tooltip-top:before,
