@@ -4,9 +4,13 @@
   "description": "Singleton based class designed to handle drawing shapes on a map manually.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsc"
+    "clean": "rimraf dist/",
+    "copy": "copyfiles -u 1  src/**/*.css dist/",
+    "build": "npm run clean && tsc && npm run copy"
   },
   "repository": {
     "type": "git",
@@ -24,9 +28,11 @@
   "homepage": "https://github.com/mike16345/leaflet-draw-manager#readme",
   "dependencies": {
     "common-js": "^0.3.8",
+    "copyfiles": "^2.4.1",
     "geojson": "^0.5.0",
     "leaflet": "^1.9.4",
-    "leaflet-polylinedecorator": "^1.6.0"
+    "leaflet-polylinedecorator": "^1.6.0",
+    "rimraf": "^5.0.5"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",

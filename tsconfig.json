@@ -1,10 +1,13 @@
 {
   "include": ["src/**/*"] /* Include only the src directory */,
   "exclude": ["node_modules"],
+  
   "compilerOptions": {
-    "lib": ["ES2015","DOM"],
-    "module": "CommonJS",
-    "target": "ES2015" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+    "rootDir": "src",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "target": "ES5" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
     "declaration": true /* Generate .d.ts files from TypeScript and JavaScript files in your project. */,
     "sourceMap": true,
     "outDir": "./dist",

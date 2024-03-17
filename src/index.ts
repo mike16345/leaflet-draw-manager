@@ -11,3 +11,5 @@ export * from "./enums";
 
 // Shapes
 export * from "./Shapes";
+
+export { ShapeFactory } from "./ShapeFactory/ShapeFactory";
