@@ -95,7 +95,11 @@ class DrawMarker extends DrawShape<L.Marker> {
 
   cancelEdit() {
     if (!this.currentShape) return;
+
     this.currentShape.setLatLng(this.preEditLatLngs[0]);
+    if (this.onCancelEditHandler) {
+      this.onCancelEditHandler(this.currentShape);
+    }
     this.stopDrawing();
   }
 
@@ -131,25 +135,25 @@ class DrawMarker extends DrawShape<L.Marker> {
 
   drawTextMarker(latLng: L.LatLng[] | null = null) {
     const latlng = (latLng && latLng[0]) || this.latLngs[0];
+    const randId = Math.floor(Math.random() * 1000 + Math.random());
 
     const marker = L.marker(latlng, {
       ...this.shapeOptions,
       draggable: this.isDraggable,
       icon: L.divIcon({
         className: "text-marker",
-        html: `<input id="text-input" dir="rtl" class="text-marker-input" placeholder="הזן טקסט כאן" value="${
+        html: `<input id="text-input-${randId}" dir="rtl" class="text-marker-input" placeholder="הזן טקסט כאן" value="${
           this.shapeOptions.text ? this.shapeOptions.text : ""
         }"/>`,
       }),
     });
     marker.addTo(this.featureGroup);
 
-    (document.querySelector("#text-input") as HTMLInputElement).addEventListener(
-      "input",
-      (e) => {
-        marker.options.text = (e.target as HTMLInputElement).value;
-      }
-    );
+    (
+      document.querySelector(`#text-input-${randId}`) as HTMLInputElement
+    ).addEventListener("input", (e) => {
+      marker.options.text = (e.target as HTMLInputElement).value;
+    });
 
     return marker;
   }
@@ -162,6 +166,9 @@ class DrawMarker extends DrawShape<L.Marker> {
     if (!this.latLngs.length) {
       this.latLngs.push(e.latlng);
       this.currentShape = this.drawShape();
+      if (this.onClickHandler) {
+        this.onClickHandler(this.latLngs);
+      }
     }
   }
 

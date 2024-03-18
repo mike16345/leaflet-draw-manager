@@ -184,6 +184,9 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     if (!this.currentShape) return;
     this.latLngs = [...this.preEditLatLngs];
     this.redrawShape();
+    if (this.onCancelEditHandler) {
+      this.onCancelEditHandler(this.currentShape);
+    }
     this.stopDrawing();
   }
 
