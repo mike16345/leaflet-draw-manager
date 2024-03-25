@@ -11,6 +11,10 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
 {
   protected shapeOptions: L.PolylineOptions;
   protected vertices: DrawLineVertices;
+  protected dashedPolyline: {
+    element: L.Polyline | null;
+    coordinates: LatLng[];
+  };
 
   constructor(
     map: L.Map,
@@ -23,6 +27,10 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.shapeType = type;
     this.vertices = new DrawLineVertices(map, type);
     this.vertices.setShapeType = type;
+    this.dashedPolyline = {
+      element: null,
+      coordinates: null,
+    };
   }
 
   startDrawing(drawVertices = true) {
@@ -67,6 +75,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
       });
     }
     super.stopDrawing();
+    this.removeDashedPolyline();
     this.vertices.clearAllVertices();
   }
 
@@ -164,6 +173,8 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
   initDrawEvents(): void {
     this.map.on("click", this.handleMapClick.bind(this));
     this.map.on("contextmenu", this.handleContextClick.bind(this));
+    if (!this.isTouchDevice)
+      this.map.on("mousemove", this.handleMouseMove.bind(this));
   }
 
   handleMapClick(e: LeafletMouseEvent) {
@@ -187,6 +198,34 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
       this.onClickHandler(this.latLngs);
     }
     this.vertices.handleContextClick();
+  }
+
+  handleMouseMove(e) {
+    if (this.drawMode !== DrawManagerMode.DRAW) return;
+    this.cursorPosition = e.latlng;
+    this.drawDashedPolyline();
+  }
+
+  removeDashedPolyline() {
+    if (!this.dashedPolyline.element) return;
+    this.featureGroup.removeLayer(this.dashedPolyline.element);
+    this.dashedPolyline.element = null;
+  }
+
+  drawDashedPolyline() {
+    if (!this.latLngs.length) return;
+
+    this.removeDashedPolyline();
+    this.dashedPolyline.coordinates = [this.latLngs.at(-1), this.cursorPosition];
+    this.dashedPolyline.element = L.polyline(this.dashedPolyline.coordinates, {
+      ...this.shapeOptions,
+      className: "cursor-crosshair",
+      weight: 4,
+      lineCap: "square", // Optional, just to avoid round borders.
+      dashArray: "3, 25",
+      dashOffset: "10",
+    });
+    this.featureGroup.addLayer(this.dashedPolyline.element);
   }
 }
 

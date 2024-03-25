@@ -16,6 +16,11 @@ class DrawShape<T extends LeafletShape> {
   protected map: L.Map;
 
   /**
+   * Position of the cursor. Used for drawing dashed polylines.
+   */
+  protected cursorPosition: LatLng;
+
+  /**
    * The currently selected shape for editing or `null` if no shape is selected.
    */
   protected currentShape: T | null;
@@ -61,6 +66,11 @@ class DrawShape<T extends LeafletShape> {
   protected onCancelEditHandler: ((shape: T | null) => void) | null;
 
   /**
+   * Flag indicating whether it is a touch device or not.
+   */
+  protected isTouchDevice: boolean;
+
+  /**
    * Creates a new DrawShape instance.
    *
    * @param map The map on which to draw the shape.
@@ -75,7 +85,9 @@ class DrawShape<T extends LeafletShape> {
     this.featureGroup = featureGroup;
     this.featureGroup.addTo(this.map);
     this.currentShape = null;
+    this.cursorPosition = new LatLng(0.0, 0.0);
     this.shapeType = "";
+    this.isTouchDevice = false;
     this.onClickHandler = null;
     this.onFinishHandler = null;
     this.onCancelEditHandler = null;
@@ -138,6 +150,10 @@ class DrawShape<T extends LeafletShape> {
    */
   setOnCancelEditHandler(onCancelEditHandler: (shape: T | null) => void) {
     this.onCancelEditHandler = onCancelEditHandler;
+  }
+
+  setIsTouchDevice(isTouchDevice: boolean) {
+    this.isTouchDevice = isTouchDevice;
   }
 
   /**
