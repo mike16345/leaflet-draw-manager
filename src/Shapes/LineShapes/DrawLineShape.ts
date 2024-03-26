@@ -1,4 +1,4 @@
-import L, { LeafletMouseEvent, LatLng } from "leaflet";
+import L, { LeafletMouseEvent, LatLng, PolylineOptions } from "leaflet";
 import { DrawManagerMode } from "../../enums/DrawManagerMode";
 import { DrawShape } from "../DrawShape";
 import { Shapes } from "../../enums/Shapes";
@@ -165,9 +165,10 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
   setCustomOnDragEndHandler(handler: (latLngs: LatLng[]) => void) {
     this.vertices.handleOnDragEnd = () => handler(this.latLngs);
   }
+
   override setShapeOptions(options: L.PolylineOptions): void {
-    if (!this.currentShape) return;
-    this.currentShape.options = options;
+    super.setShapeOptions(options);
+    this.currentShape?.setStyle(options);
   }
 
   initDrawEvents(): void {
@@ -226,6 +227,32 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
       dashOffset: "10",
     });
     this.featureGroup.addLayer(this.dashedPolyline.element);
+  }
+
+  /**
+   * Sets the value of a shape attribute.
+   * @param attribute The name of the shape attribute to change.
+   * @param value The new value of the shape attribute.
+   */
+  changeShapeAttribute(attribute: keyof PolylineOptions, value: any) {
+    if (!this.currentShape) return;
+    this.currentShape.setStyle({
+      ...this.currentShape.options,
+      [attribute]: value,
+    });
+
+    // if (attribute == "weight") {
+    //   this.currentShadowEntity?.setStyle({
+    //     ...this.currentShadowEntity.options,
+    //     [attribute]: value + 3,
+    //   });
+    //   return;
+    // }
+
+    // this.currentShadowEntity?.setStyle({
+    //   ...this.currentShadowEntity.options,
+    //   [attribute]: value,
+    // });
   }
 }
 

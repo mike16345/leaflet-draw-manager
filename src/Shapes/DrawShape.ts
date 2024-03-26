@@ -3,6 +3,7 @@ import { DrawManagerMode } from "../enums/DrawManagerMode";
 import { Shapes } from "../enums/Shapes";
 import { LeafletShape } from "../types/LeafletShape";
 import { ShapeOptions } from "../types/ShapeOptions";
+import { ShapeFactory } from "../ShapeFactory/ShapeFactory";
 
 /**
  * A class for drawing a specific shape on a map.
@@ -76,7 +77,7 @@ class DrawShape<T extends LeafletShape> {
    * @param map The map on which to draw the shape.
    * @param featureGroup The feature group to which the drawn shape will be added.
    */
-  constructor(map: L.Map, featureGroup: L.FeatureGroup) {
+  protected constructor(map: L.Map, featureGroup: L.FeatureGroup) {
     this.map = map;
     this.map.doubleClickZoom.disable();
     this.drawMode = DrawManagerMode.START;
@@ -91,6 +92,14 @@ class DrawShape<T extends LeafletShape> {
     this.onClickHandler = null;
     this.onFinishHandler = null;
     this.onCancelEditHandler = null;
+  }
+
+  protected static validateInstanceCall() {
+    if (!ShapeFactory._calledFromShapeFactory) {
+      throw new Error(
+        "You must use the ShapeFactory class to create instances of shapes!"
+      );
+    }
   }
 
   /**
@@ -171,6 +180,10 @@ class DrawShape<T extends LeafletShape> {
    */
   getCurrentShape() {
     return this.currentShape;
+  }
+
+  getShapeType() {
+    return this.shapeType;
   }
 
   setShapeOptions(shapeOptions: ShapeOptions) {

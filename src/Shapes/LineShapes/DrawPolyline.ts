@@ -1,4 +1,5 @@
 import { Shapes } from "../../enums/Shapes";
+import { DrawShape } from "../DrawShape";
 import { DrawLineShape } from "./DrawLineShape";
 import L from "leaflet";
 
@@ -27,6 +28,7 @@ class DrawPolyline extends DrawLineShape<L.Polyline> {
     featureGroup: L.FeatureGroup,
     shapeOptions: L.PolylineOptions
   ): DrawPolyline {
+    DrawShape.validateInstanceCall();
     if (!DrawPolyline.instance) {
       DrawPolyline.instance = new DrawPolyline(map, featureGroup, shapeOptions);
     }

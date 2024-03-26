@@ -75,6 +75,8 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     featureGroup: L.FeatureGroup,
     shapeOptions: L.CircleOptions
   ): DrawCircle {
+    DrawShape.validateInstanceCall();
+
     if (!DrawCircle.instance) {
       DrawCircle.instance = new DrawCircle(map, featureGroup, shapeOptions);
     }

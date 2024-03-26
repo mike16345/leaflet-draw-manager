@@ -39,7 +39,7 @@ class DrawMarker extends DrawShape<L.Marker> {
   }
 
   /**
-   * Creates a new instance of DrawIcon or returns the existing instance if it exists.
+   * Creates a new instance of DrawMarker or returns the existing instance if it exists.
    * @param map The map on which to draw icons.
    * @param featureGroup The feature group to which the drawn icons should be added.
    * @param shapeOptions The options for the icon shape.
@@ -49,6 +49,7 @@ class DrawMarker extends DrawShape<L.Marker> {
     featureGroup: L.FeatureGroup,
     shapeOptions: L.IconOptions
   ): DrawMarker {
+    DrawShape.validateInstanceCall();
     if (!DrawMarker.instance) {
       DrawMarker.instance = new DrawMarker(map, featureGroup, shapeOptions);
     }
@@ -69,7 +70,7 @@ class DrawMarker extends DrawShape<L.Marker> {
     this.initDrawEvents();
   }
 
-  stopDrawing(): void {
+  override stopDrawing(): void {
     if (this.currentShape) {
       this.currentShape.dragging?.disable();
     }
@@ -103,7 +104,7 @@ class DrawMarker extends DrawShape<L.Marker> {
     this.stopDrawing();
   }
 
-  deleteShape(): void {
+  override deleteShape(): void {
     super.deleteShape();
     this.stopDrawing();
     this.resetInstance();
@@ -162,7 +163,7 @@ class DrawMarker extends DrawShape<L.Marker> {
     this.map.on("click", this.handleMapClick.bind(this));
   }
 
-  handleMapClick(e: LeafletMouseEvent) {
+  private handleMapClick(e: LeafletMouseEvent) {
     if (!this.latLngs.length) {
       this.latLngs.push(e.latlng);
       this.currentShape = this.drawShape();
