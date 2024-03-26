@@ -180,7 +180,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
       this.map.on("mousemove", this.handleMouseMove.bind(this));
   }
 
-  handleMapClick(e: LeafletMouseEvent) {
+  protected handleMapClick(e: LeafletMouseEvent) {
     this.latLngs.push(e.latlng);
     this.redrawShape();
 
@@ -195,8 +195,8 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
       this.stopDrawing();
     }
 
-    this.fireEvent("onDeletePoint", [this.latLngs]);
     this.vertices.handleContextClick();
+    this.fireEvent("onDeletePoint", [this.latLngs]);
   }
 
   handleMouseMove(e) {
