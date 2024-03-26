@@ -2,8 +2,9 @@ import L, { LeafletMouseEvent, LatLng, PolylineOptions } from "leaflet";
 import { DrawManagerMode } from "../../enums/DrawManagerMode";
 import { DrawShape } from "../DrawShape";
 import { Shapes } from "../../enums/Shapes";
-import { IDrawShape } from "../../interfaces/IDrawShape";
+import { IDrawManagerEvents, IDrawShape } from "../../interfaces/IDrawShape";
 import { DrawLineVertices } from "../../Vertices/DrawLineVertices";
+import { getShapePositions } from "../../utils/shapeUtils";
 
 class DrawLineShape<T extends L.Polygon | L.Polyline>
   extends DrawShape<T>
@@ -47,11 +48,13 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     } else {
       this.redrawShape();
     }
+    this.fireEvent("onDrawStart");
   }
 
   setVerticesEvents() {
-    this.vertices.setHandleDragVertex(this.handleDragVertex.bind(this));
-    this.vertices.setHandleDragMidpointVertex(
+    this.vertices.on("onDragVertex", this.handleDragVertex.bind(this));
+    this.vertices.on(
+      "onDragMidpointVertex",
       this.handleDragMidpointVertex.bind(this)
     );
   }
@@ -89,7 +92,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.drawMode = DrawManagerMode.EDIT;
     this.currentShape = shape;
     this.featureGroup.addLayer(this.currentShape);
-    this.latLngs = this.getShapeLatLngs();
+    this.latLngs = getShapePositions(shape);
     this.preEditLatLngs = [...this.latLngs];
 
     this.currentShape.setStyle({
@@ -105,6 +108,8 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.vertices.drawVertices();
     this.vertices.drawMidpointVertices();
     this.disableDrawEvents();
+
+    this.fireEvent("onEditStart");
 
     return this.currentShape;
   }
@@ -132,17 +137,13 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.redrawShape();
   }
 
-  getShapeLatLngs(): LatLng[] {
-    if (!this.currentShape) return [];
-    const shapeLatLngs = this.currentShape.getLatLngs();
-
-    return (
-      this.currentShape instanceof L.Polygon ? shapeLatLngs[0] : shapeLatLngs
-    ) as LatLng[];
-  }
+  /**
+   * @deprecated Use getShapePositions method instead.
+   */
+  getShapeLatLngs() {}
 
   drawShape(): T {
-    throw new Error("drawShape method must be implemented in the derived class.");
+    throw new Error("drawShape method must be implemented in a derived class.");
   }
 
   setLatLngs(latLngs: LatLng[]): void {
@@ -162,8 +163,9 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     return this.vertices.getDisplayLineDistances();
   }
 
-  setCustomOnDragEndHandler(handler: (latLngs: LatLng[]) => void) {
-    this.vertices.handleOnDragEnd = () => handler(this.latLngs);
+  override on(event: keyof IDrawManagerEvents, callback: Function) {
+    super.on(event, callback);
+    this.vertices.on(event, callback);
   }
 
   override setShapeOptions(options: L.PolylineOptions): void {
@@ -182,9 +184,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.latLngs.push(e.latlng);
     this.redrawShape();
 
-    if (this.onClickHandler) {
-      this.onClickHandler(this.latLngs);
-    }
+    this.fireEvent("onAddPoint", [this.latLngs]);
   }
 
   handleContextClick() {
@@ -195,9 +195,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
       this.stopDrawing();
     }
 
-    if (this.onClickHandler) {
-      this.onClickHandler(this.latLngs);
-    }
+    this.fireEvent("onDeletePoint", [this.latLngs]);
     this.vertices.handleContextClick();
   }
 

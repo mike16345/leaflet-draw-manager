@@ -1,5 +1,6 @@
 import { DrawManagerMode } from "../../enums/DrawManagerMode";
 import { Shapes } from "../../enums/Shapes";
+import { IDrawManagerEvents } from "../../interfaces/IDrawShape";
 import { DrawShape } from "../DrawShape";
 import { DrawLineShape } from "./DrawLineShape";
 import L from "leaflet";
@@ -11,6 +12,7 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
   private static instance: DrawPolygon | null = null;
   private dragMarker: L.Marker | null;
   private isDraggingCenterMarker: boolean;
+  private onDragEndHandler: Function | null;
 
   /**
    * Creates a new instance of DrawPolygon.
@@ -76,6 +78,11 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
 
     return polygon;
   }
+  
+  override on(event: keyof IDrawManagerEvents, callback: Function): void {
+    super.on(event, callback);
+    if (event === "onDragEndVertex") this.onDragEndHandler = callback;
+  }
 
   private addDragMarker() {
     if (!this.currentShape || this.latLngs.length < 3 || this.dragMarker) return;
@@ -96,15 +103,12 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
     };
 
     var marker = L.marker(polygonCenter, MarkerOptions).addTo(this.featureGroup);
-    marker.on(
-      "dragstart",
-      function (event) {
-        this.isDraggingCenterMarker = true;
-        this.vertices.clearAllVertices();
-        this.disableDrawEvents();
-        this.removeDashedPolyline();
-      }.bind(this)
-    );
+    marker.on("dragstart", (e) => {
+      this.isDraggingCenterMarker = true;
+      this.vertices.clearAllVertices();
+      this.disableDrawEvents();
+      this.removeDashedPolyline();
+    });
 
     // When the marker is dragged, update the polygon's position
     marker.on("drag", (event) => {
@@ -125,27 +129,27 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
       this.latLngs = latlngs;
 
       this.redrawShape();
+      this.fireEvent("onEdit", [this.latLngs]);
 
       // Update the polygon center
       polygonCenter = markerLatLng;
     });
 
-    marker.on(
-      "dragend",
-      function (event) {
-        this.isDraggingCenterMarker = false;
-        this.vertices.setLatLngs = [...this.latLngs];
-        this.vertices.drawVertices();
-        this.vertices.drawMidpointVertices();
-        if (this.drawMode !== DrawManagerMode.DRAW) return;
-        this.cursorPosition = event.target._latlng;
-        this.drawDashedPolyline();
-        setTimeout(() => {
-          this.initDrawEvents();
-          this.vertices.initDrawEvents();
-        }, 50);
-      }.bind(this)
-    );
+    marker.on("dragend", (event) => {
+      this.isDraggingCenterMarker = false;
+      this.vertices.setLatLngs = [...this.latLngs];
+      this.vertices.drawVertices();
+      this.vertices.drawMidpointVertices();
+      this.fireEvent("onEdit", [this.latLngs]);
+      if (this.drawMode !== DrawManagerMode.DRAW) return;
+      this.cursorPosition = event.target._latlng;
+      this.drawDashedPolyline();
+
+      setTimeout(() => {
+        this.initDrawEvents();
+        this.vertices.initDrawEvents();
+      }, 50);
+    });
 
     this.dragMarker = marker;
   }

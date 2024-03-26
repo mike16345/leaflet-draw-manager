@@ -4,6 +4,7 @@ import { Shapes } from "../enums/Shapes";
 import { LeafletShape } from "../types/LeafletShape";
 import { ShapeOptions } from "../types/ShapeOptions";
 import { ShapeFactory } from "../ShapeFactory/ShapeFactory";
+import { IDrawManagerEvents } from "../interfaces/IDrawShape";
 
 /**
  * A class for drawing a specific shape on a map.
@@ -72,6 +73,11 @@ class DrawShape<T extends LeafletShape> {
   protected isTouchDevice: boolean;
 
   /**
+   * Mapped events for custom behavior.
+   */
+  protected events: IDrawManagerEvents;
+
+  /**
    * Creates a new DrawShape instance.
    *
    * @param map The map on which to draw the shape.
@@ -92,6 +98,7 @@ class DrawShape<T extends LeafletShape> {
     this.onClickHandler = null;
     this.onFinishHandler = null;
     this.onCancelEditHandler = null;
+    this.events = {};
   }
 
   protected static validateInstanceCall() {
@@ -102,6 +109,20 @@ class DrawShape<T extends LeafletShape> {
     }
   }
 
+  on(event: keyof IDrawManagerEvents, callback: Function) {
+    this.events[event] = callback;
+  }
+
+  off(event: keyof IDrawManagerEvents) {
+    this.events[event] = null;
+  }
+
+  protected fireEvent(event: keyof IDrawManagerEvents, args = []) {
+    if (this.events[event]) {
+      this.events[event](...args);
+    }
+  }
+
   /**
    * Stops drawing and calls the appropriate handler.
    */
@@ -109,9 +130,7 @@ class DrawShape<T extends LeafletShape> {
     this.drawMode = DrawManagerMode.STOP;
     this.disableDrawEvents();
 
-    if (this.onFinishHandler) {
-      this.onFinishHandler(this.currentShape);
-    }
+    this.fireEvent("onFinish", [this.currentShape]);
 
     this.currentShape = null;
     this.latLngs = [];
@@ -132,6 +151,7 @@ class DrawShape<T extends LeafletShape> {
     if (!this.currentShape) return;
     this.featureGroup.removeLayer(this.currentShape);
     this.latLngs = [];
+    this.fireEvent("onDeleteShape");
   }
 
   /**

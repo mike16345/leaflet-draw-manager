@@ -52,6 +52,11 @@ class DrawCircularVertices extends DrawVertices {
       }),
     });
 
+    marker.on("dragstart", () => {
+      this.handleTouchStart();
+      this.fireEvent("onDragMidpointVertexStart");
+    });
+
     marker.on("drag", (e: any) => {
       const targetLatLng = e.latlng;
       const newLat = targetLatLng.lat - this.originalDistance.x;
@@ -60,10 +65,12 @@ class DrawCircularVertices extends DrawVertices {
 
       this.latLngs[0] = targetLatLng;
       this.drawOuterVertex(newLatLng);
+      this.fireEvent("onDragMidpointVertex", [e]);
+    });
 
-      if (this.handleDragMidpoint) {
-        this.handleDragMidpoint(e);
-      }
+    marker.on("dragend", (e: L.LeafletEvent) => {
+      this.fireEvent("onDragEndMidpointVertex");
+      this.handleTouchEnd();
     });
 
     marker.addTo(this.midpointVertices);
@@ -100,16 +107,18 @@ class DrawCircularVertices extends DrawVertices {
       }),
     });
 
+    marker.on("dragstart", () => this.fireEvent("onDragVertexStart"));
+
     marker.on("drag", (e: any) => {
       this.latLngs[1] = e.latlng;
-      if (this.handleDragVertex) {
-        this.handleDragVertex(e);
-      }
+      this.fireEvent("onDragVertex", [e]);
       this.originalDistance = {
         x: this.latLngs[0].lat - this.latLngs[1].lat,
         y: this.latLngs[0].lng - this.latLngs[1].lng,
       };
     });
+
+    marker.on("dragend", () => this.fireEvent("onDragEndVertex"));
 
     marker.addTo(this.vertices);
     this.outerMarker = marker;

@@ -1,6 +1,6 @@
 import { Circle, FeatureGroup, LatLng, LeafletMouseEvent } from "leaflet";
 import { DrawShape } from "../DrawShape";
-import { IDrawShape } from "../../interfaces/IDrawShape";
+import { IDrawManagerEvents, IDrawShape } from "../../interfaces/IDrawShape";
 import { DrawManagerMode } from "../../enums/DrawManagerMode";
 import L from "leaflet";
 import { Shapes } from "../../enums/Shapes";
@@ -123,6 +123,11 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     this.stopDrawing();
   }
 
+  override on(event: keyof IDrawManagerEvents, callback: Function) {
+    super.on(event, callback);
+    this.vertices.on(event, callback);
+  }
+
   /**
    * Edits an existing circle.
    * @param circle The circle to edit.
@@ -155,8 +160,9 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    * Sets the event handlers for the vertices of the drawn circle.
    */
   setVerticesEvents() {
-    this.vertices.setHandleDragVertex(this.handleDragVertex.bind(this));
-    this.vertices.setHandleDragMidpointVertex(
+    this.vertices.on("onDragVertex", this.handleDragVertex.bind(this));
+    this.vertices.on(
+      "onDragMidpointVertex",
       this.handleDragMidpointVertex.bind(this)
     );
   }

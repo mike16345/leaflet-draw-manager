@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { CircleOptions } from "leaflet";
+import { CircleOptions, LatLng } from "leaflet";
 import { FeatureGroup, useMap } from "react-leaflet";
 import L from "leaflet";
 import { renderToString } from "react-dom/server";
@@ -123,8 +123,9 @@ const SketchesToolbar = () => {
     const shapeInstance = getShapeInstance(sketchType);
     if (!shapeInstance) return;
 
-    shapeInstance.setCustomOnFinishHandler((shape: LeafletShape | null) => {
+    shapeInstance.on("onFinish", (shape: LeafletShape | null) => {
       if (!shape) return;
+      //@ts-ignore
       shape.type = sketchType;
       // Add logic to handle shape if needed like
       shape.on("dblclick", (e) => {
@@ -135,6 +136,46 @@ const SketchesToolbar = () => {
         setSketchType(e.target.type);
       });
     });
+
+    shapeInstance.on("onAddPoint", (latlngs: LatLng) => {
+      console.log("add point", latlngs);
+    });
+
+    shapeInstance.on("onDeletePoint", (latlngs: LatLng) => {
+      console.log("delete point", latlngs);
+    });
+
+    shapeInstance.on("onDragVertex", (latlngs: LatLng) => {
+      console.log("drag vertex", latlngs);
+    });
+
+    shapeInstance.on("onDragEndVertex", (latlngs: LatLng) => {
+      console.log("drag end vertex", latlngs);
+    });
+
+    shapeInstance.on("onDragVertexStart", (latlngs: LatLng) => {
+      console.log("drag start vertex", latlngs);
+    });
+
+    shapeInstance.on("onDragMidpointVertex", (latlngs: LatLng) => {
+      console.log("drag vertex", latlngs);
+    });
+
+    shapeInstance.on("onDragEndMidpointVertex", (latlngs: LatLng) => {
+      console.log("drag end vertex", latlngs);
+    });
+
+    shapeInstance.on("onDragMidpointVertexStart", (latlngs: LatLng) => {
+      console.log("drag start vertex", latlngs);
+    });
+
+    shapeInstance.on("onDeleteShape", () => {
+      console.log("delete shape");
+    });
+
+    shapeInstance.on("onDrawStart", () => console.log("start draw event"));
+    shapeInstance.on("onEditStart", () => console.log("start edit event"));
+    shapeInstance.on("onCancelEdit", () => console.log("cancel edit event"));
 
     setSketchType(sketchType);
     shapeInstance.startDrawing();
