@@ -38,18 +38,17 @@ class DrawLineVertices extends DrawVertices {
 
     vertexMarker.on("dragstart", () => {
       this.handleTouchStart();
+      this.fireEvent("onDragVertexStart");
     });
 
     vertexMarker.on("drag", (e: any) => {
       this.latLngs[index] = e.latlng;
-      if (this.handleDragVertex) this.handleDragVertex(e, index);
+      this.fireEvent("onDragVertex", [e, index]);
       this.refreshMidpointMarkers(index);
     });
 
     vertexMarker.on("dragend", (e: L.LeafletEvent) => {
-      if (this.handleOnDragEnd) {
-        this.handleOnDragEnd();
-      }
+      this.fireEvent("onDragEndVertex", [this.latLngs]);
       this.handleTouchEnd();
     });
 
@@ -115,6 +114,7 @@ class DrawLineVertices extends DrawVertices {
 
     midpointMarker.on("dragstart", () => {
       this.handleTouchStart();
+      this.fireEvent("onDragMidpointVertexStart");
     });
 
     midpointMarker.on("drag", (e: any) => {
@@ -124,8 +124,7 @@ class DrawLineVertices extends DrawVertices {
         this.drawVertices();
       }
 
-      if (this.handleDragMidpoint)
-        this.handleDragMidpoint(e, index, !this.isDragging);
+      this.fireEvent("onDragMidpointVertex", [e, index, !this.isDragging]);
 
       this.latLngs[index + 1] = e.latlng;
       const vertexMarker = this.vertices.getLayers()[index + 1];
@@ -141,9 +140,7 @@ class DrawLineVertices extends DrawVertices {
       this.isDragging = false;
       this.clearVertices();
       this.drawVertices();
-      if (this.handleOnDragEnd) {
-        this.handleOnDragEnd();
-      }
+      this.fireEvent("onDragEndMidpointVertex", [this.latLngs]);
       this.handleTouchEnd();
     });
     midpointMarker.addTo(this.midpointVertices);

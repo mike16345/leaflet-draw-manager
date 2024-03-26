@@ -3,6 +3,8 @@ import { DrawManagerMode } from "../enums/DrawManagerMode";
 import { Shapes } from "../enums/Shapes";
 import { LeafletShape } from "../types/LeafletShape";
 import { ShapeOptions } from "../types/ShapeOptions";
+import { ShapeFactory } from "../ShapeFactory/ShapeFactory";
+import { IDrawManagerEvents } from "../interfaces/IDrawShape";
 
 /**
  * A class for drawing a specific shape on a map.
@@ -14,6 +16,11 @@ class DrawShape<T extends LeafletShape> {
    * The Leaflet map instance on which shapes will be drawn and edited.
    */
   protected map: L.Map;
+
+  /**
+   * Position of the cursor. Used for drawing dashed polylines.
+   */
+  protected cursorPosition: LatLng;
 
   /**
    * The currently selected shape for editing or `null` if no shape is selected.
@@ -61,12 +68,22 @@ class DrawShape<T extends LeafletShape> {
   protected onCancelEditHandler: ((shape: T | null) => void) | null;
 
   /**
+   * Flag indicating whether it is a touch device or not.
+   */
+  protected isTouchDevice: boolean;
+
+  /**
+   * Mapped events for custom behavior.
+   */
+  protected events: IDrawManagerEvents;
+
+  /**
    * Creates a new DrawShape instance.
    *
    * @param map The map on which to draw the shape.
    * @param featureGroup The feature group to which the drawn shape will be added.
    */
-  constructor(map: L.Map, featureGroup: L.FeatureGroup) {
+  protected constructor(map: L.Map, featureGroup: L.FeatureGroup) {
     this.map = map;
     this.map.doubleClickZoom.disable();
     this.drawMode = DrawManagerMode.START;
@@ -75,10 +92,52 @@ class DrawShape<T extends LeafletShape> {
     this.featureGroup = featureGroup;
     this.featureGroup.addTo(this.map);
     this.currentShape = null;
+    this.cursorPosition = new LatLng(0.0, 0.0);
     this.shapeType = "";
+    this.isTouchDevice = false;
     this.onClickHandler = null;
     this.onFinishHandler = null;
     this.onCancelEditHandler = null;
+    this.events = {};
+  }
+
+  protected static validateInstanceCall() {
+    if (!ShapeFactory._calledFromShapeFactory) {
+      throw new Error(
+        "You must use the ShapeFactory class to create instances of shapes!"
+      );
+    }
+  }
+
+  /**
+   * Sets a custom event handler for the shape.
+   *
+   * @param event The name of the event to listen for.
+   * @param callback The function to call when the event is triggered.
+   */
+  on(event: keyof IDrawManagerEvents, callback: Function): void {
+    this.events[event] = callback;
+  }
+
+  /**
+   * Removes an event handler from the shape.
+   *
+   * @param event The name of the event to stop listening for.
+   */
+  off(event: keyof IDrawManagerEvents): void {
+    this.events[event] = null;
+  }
+
+  /**
+   * Fires an event with the specified arguments.
+   *
+   * @param event The name of the event to fire.
+   * @param args The arguments to pass to the event handler.
+   */
+  protected fireEvent(event: keyof IDrawManagerEvents, args: any[] = []): void {
+    if (this.events[event]) {
+      this.events[event](...args);
+    }
   }
 
   /**
@@ -88,9 +147,7 @@ class DrawShape<T extends LeafletShape> {
     this.drawMode = DrawManagerMode.STOP;
     this.disableDrawEvents();
 
-    if (this.onFinishHandler) {
-      this.onFinishHandler(this.currentShape);
-    }
+    this.fireEvent("onFinish", [this.currentShape]);
 
     this.currentShape = null;
     this.latLngs = [];
@@ -111,12 +168,12 @@ class DrawShape<T extends LeafletShape> {
     if (!this.currentShape) return;
     this.featureGroup.removeLayer(this.currentShape);
     this.latLngs = [];
+    this.fireEvent("onDeleteShape");
   }
 
   /**
    * Sets a custom click handler for the shape.
-   *
-   * @param clickHandler The custom click handler.
+   * @deprecated This method is deprecated and will be removed in the next major version.
    */
   setCustomOnClickHandler(clickHandler: (latLngs: LatLng[]) => void) {
     this.onClickHandler = clickHandler;
@@ -124,8 +181,8 @@ class DrawShape<T extends LeafletShape> {
 
   /**
    * Sets a custom finish handler for the shape.
+   * @deprecated This method is deprecated and will be removed in the next major version.
    *
-   * @param onFinishHandler The custom finish handler.
    */
   setCustomOnFinishHandler(onFinishHandler: (shape: T | null) => void) {
     this.onFinishHandler = onFinishHandler;
@@ -134,10 +191,14 @@ class DrawShape<T extends LeafletShape> {
   /**
    * Sets a custom cancel edit handler for the shape.
    *
-   * @param onCancelEditHandler The custom cancel edit handler.
+   * @deprecated This method is deprecated and will be removed in the next major version.
    */
   setOnCancelEditHandler(onCancelEditHandler: (shape: T | null) => void) {
     this.onCancelEditHandler = onCancelEditHandler;
+  }
+
+  setIsTouchDevice(isTouchDevice: boolean) {
+    this.isTouchDevice = isTouchDevice;
   }
 
   /**
@@ -155,6 +216,10 @@ class DrawShape<T extends LeafletShape> {
    */
   getCurrentShape() {
     return this.currentShape;
+  }
+
+  getShapeType() {
+    return this.shapeType;
   }
 
   setShapeOptions(shapeOptions: ShapeOptions) {

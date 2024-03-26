@@ -1,9 +1,10 @@
-import L, { LeafletMouseEvent, LatLng } from "leaflet";
+import L, { LeafletMouseEvent, LatLng, PolylineOptions } from "leaflet";
 import { DrawManagerMode } from "../../enums/DrawManagerMode";
 import { DrawShape } from "../DrawShape";
 import { Shapes } from "../../enums/Shapes";
-import { IDrawShape } from "../../interfaces/IDrawShape";
+import { IDrawManagerEvents, IDrawShape } from "../../interfaces/IDrawShape";
 import { DrawLineVertices } from "../../Vertices/DrawLineVertices";
+import { getShapePositions } from "../../utils/shapeUtils";
 
 class DrawLineShape<T extends L.Polygon | L.Polyline>
   extends DrawShape<T>
@@ -11,6 +12,10 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
 {
   protected shapeOptions: L.PolylineOptions;
   protected vertices: DrawLineVertices;
+  protected dashedPolyline: {
+    element: L.Polyline | null;
+    coordinates: LatLng[];
+  };
 
   constructor(
     map: L.Map,
@@ -23,6 +28,10 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.shapeType = type;
     this.vertices = new DrawLineVertices(map, type);
     this.vertices.setShapeType = type;
+    this.dashedPolyline = {
+      element: null,
+      coordinates: null,
+    };
   }
 
   startDrawing(drawVertices = true) {
@@ -39,11 +48,13 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     } else {
       this.redrawShape();
     }
+    this.fireEvent("onDrawStart");
   }
 
   setVerticesEvents() {
-    this.vertices.setHandleDragVertex(this.handleDragVertex.bind(this));
-    this.vertices.setHandleDragMidpointVertex(
+    this.vertices.on("onDragVertex", this.handleDragVertex.bind(this));
+    this.vertices.on(
+      "onDragMidpointVertex",
       this.handleDragMidpointVertex.bind(this)
     );
   }
@@ -67,6 +78,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
       });
     }
     super.stopDrawing();
+    this.removeDashedPolyline();
     this.vertices.clearAllVertices();
   }
 
@@ -80,7 +92,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.drawMode = DrawManagerMode.EDIT;
     this.currentShape = shape;
     this.featureGroup.addLayer(this.currentShape);
-    this.latLngs = this.getShapeLatLngs();
+    this.latLngs = getShapePositions(shape);
     this.preEditLatLngs = [...this.latLngs];
 
     this.currentShape.setStyle({
@@ -96,6 +108,8 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.vertices.drawVertices();
     this.vertices.drawMidpointVertices();
     this.disableDrawEvents();
+
+    this.fireEvent("onEditStart");
 
     return this.currentShape;
   }
@@ -123,17 +137,13 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.redrawShape();
   }
 
-  getShapeLatLngs(): LatLng[] {
-    if (!this.currentShape) return [];
-    const shapeLatLngs = this.currentShape.getLatLngs();
-
-    return (
-      this.currentShape instanceof L.Polygon ? shapeLatLngs[0] : shapeLatLngs
-    ) as LatLng[];
-  }
+  /**
+   * @deprecated Use getShapePositions method instead.
+   */
+  getShapeLatLngs() {}
 
   drawShape(): T {
-    throw new Error("drawShape method must be implemented in the derived class.");
+    throw new Error("drawShape method must be implemented in a derived class.");
   }
 
   setLatLngs(latLngs: LatLng[]): void {
@@ -153,26 +163,28 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     return this.vertices.getDisplayLineDistances();
   }
 
-  setCustomOnDragEndHandler(handler: (latLngs: LatLng[]) => void) {
-    this.vertices.handleOnDragEnd = () => handler(this.latLngs);
+  override on(event: keyof IDrawManagerEvents, callback: Function) {
+    super.on(event, callback);
+    this.vertices.on(event, callback);
   }
+
   override setShapeOptions(options: L.PolylineOptions): void {
-    if (!this.currentShape) return;
-    this.currentShape.options = options;
+    super.setShapeOptions(options);
+    this.currentShape?.setStyle(options);
   }
 
   initDrawEvents(): void {
     this.map.on("click", this.handleMapClick.bind(this));
     this.map.on("contextmenu", this.handleContextClick.bind(this));
+    if (!this.isTouchDevice)
+      this.map.on("mousemove", this.handleMouseMove.bind(this));
   }
 
-  handleMapClick(e: LeafletMouseEvent) {
+  protected handleMapClick(e: LeafletMouseEvent) {
     this.latLngs.push(e.latlng);
     this.redrawShape();
 
-    if (this.onClickHandler) {
-      this.onClickHandler(this.latLngs);
-    }
+    this.fireEvent("onAddPoint", [this.latLngs]);
   }
 
   handleContextClick() {
@@ -183,10 +195,49 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
       this.stopDrawing();
     }
 
-    if (this.onClickHandler) {
-      this.onClickHandler(this.latLngs);
-    }
     this.vertices.handleContextClick();
+    this.fireEvent("onDeletePoint", [this.latLngs]);
+  }
+
+  protected handleMouseMove(e) {
+    if (this.drawMode !== DrawManagerMode.DRAW) return;
+    this.cursorPosition = e.latlng;
+    this.drawDashedPolyline();
+  }
+
+  removeDashedPolyline() {
+    if (!this.dashedPolyline.element) return;
+    this.featureGroup.removeLayer(this.dashedPolyline.element);
+    this.dashedPolyline.element = null;
+  }
+
+  protected drawDashedPolyline() {
+    if (!this.latLngs.length) return;
+
+    this.removeDashedPolyline();
+    this.dashedPolyline.coordinates = [this.latLngs.at(-1), this.cursorPosition];
+    this.dashedPolyline.element = L.polyline(this.dashedPolyline.coordinates, {
+      ...this.shapeOptions,
+      className: "cursor-crosshair",
+      weight: 4,
+      lineCap: "square", // Optional, just to avoid round borders.
+      dashArray: "3, 25",
+      dashOffset: "10",
+    });
+    this.featureGroup.addLayer(this.dashedPolyline.element);
+  }
+
+  /**
+   * Sets the value of a shape attribute.
+   * @param attribute The name of the shape attribute to change.
+   * @param value The new value of the shape attribute.
+   */
+  changeShapeAttribute(attribute: keyof PolylineOptions, value: any) {
+    if (!this.currentShape) return;
+    this.currentShape.setStyle({
+      ...this.currentShape.options,
+      [attribute]: value,
+    });
   }
 }
 

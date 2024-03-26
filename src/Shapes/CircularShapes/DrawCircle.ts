@@ -1,6 +1,6 @@
 import { Circle, FeatureGroup, LatLng, LeafletMouseEvent } from "leaflet";
 import { DrawShape } from "../DrawShape";
-import { IDrawShape } from "../../interfaces/IDrawShape";
+import { IDrawManagerEvents, IDrawShape } from "../../interfaces/IDrawShape";
 import { DrawManagerMode } from "../../enums/DrawManagerMode";
 import L from "leaflet";
 import { Shapes } from "../../enums/Shapes";
@@ -75,6 +75,8 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     featureGroup: L.FeatureGroup,
     shapeOptions: L.CircleOptions
   ): DrawCircle {
+    DrawShape.validateInstanceCall();
+
     if (!DrawCircle.instance) {
       DrawCircle.instance = new DrawCircle(map, featureGroup, shapeOptions);
     }
@@ -121,6 +123,11 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     this.stopDrawing();
   }
 
+  override on(event: keyof IDrawManagerEvents, callback: Function) {
+    super.on(event, callback);
+    this.vertices.on(event, callback);
+  }
+
   /**
    * Edits an existing circle.
    * @param circle The circle to edit.
@@ -153,8 +160,9 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    * Sets the event handlers for the vertices of the drawn circle.
    */
   setVerticesEvents() {
-    this.vertices.setHandleDragVertex(this.handleDragVertex.bind(this));
-    this.vertices.setHandleDragMidpointVertex(
+    this.vertices.on("onDragVertex", this.handleDragVertex.bind(this));
+    this.vertices.on(
+      "onDragMidpointVertex",
       this.handleDragMidpointVertex.bind(this)
     );
   }
@@ -163,7 +171,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    * Handles the dragging of a vertex of the drawn circle.
    * @param e The event containing the dragged vertex.
    */
-  handleDragVertex(e: any): void {
+  protected handleDragVertex(e: any): void {
     this.latLngs[1] = e.latlng;
     this.redrawShape();
   }
@@ -172,7 +180,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    * Handles the dragging of the midpoint of a vertex of the drawn circle.
    * @param e The event containing the dragged vertex.
    */
-  handleDragMidpointVertex(e: any): void {
+  protected handleDragMidpointVertex(e: any): void {
     this.latLngs[0] = e.latlng;
     this.currentShape?.setLatLng(e.latlng);
   }
@@ -184,23 +192,14 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     if (!this.currentShape) return;
     this.latLngs = [...this.preEditLatLngs];
     this.redrawShape();
-    if (this.onCancelEditHandler) {
-      this.onCancelEditHandler(this.currentShape);
-    }
+    this.fireEvent("onCancelEdit", [this.currentShape]);
     this.stopDrawing();
   }
 
   /**
-   * Gets the position of the drawn circle.
-   * @returns The position of the drawn circle, consisting of the center and outer points.
+   * @deprecated Use getShapePositions.
    */
-  getPosition() {
-    if (!this.currentShape) return;
-    const circleCenter = this.currentShape.getLatLng(); // Get the center of the circle
-    const point2 = DrawCircle.getRadiusLatLng(this.currentShape);
-
-    return [circleCenter, point2];
-  }
+  getPosition() {}
 
   /**
    * Draws a circle on the map.
@@ -246,7 +245,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    *
    * @returns The radius of the circle, or undefined if the circle is not being drawn.
    */
-  calculateRadius() {
+  protected calculateRadius() {
     let radius;
     let positionFrom;
 
@@ -312,7 +311,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    * Handles the mouse move event on the map.
    * @param e The mouse move event.
    */
-  handleMapMouseMove(e: LeafletMouseEvent): void {
+  protected handleMapMouseMove(e: LeafletMouseEvent): void {
     this.cursorPosition = e.latlng;
     if (this.latLngs.length == 1) {
       this.redrawShape();
@@ -323,7 +322,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    * Handles the click event on the map.
    * @param e The click event.
    */
-  handleMapClick(e: LeafletMouseEvent): void {
+  protected handleMapClick(e: LeafletMouseEvent): void {
     this.latLngs.push(e.latlng);
 
     if (this.onClickHandler) {

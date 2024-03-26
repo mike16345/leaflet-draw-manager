@@ -20,4 +20,22 @@ interface IDrawVertices {
   handleContextClick: (() => void) | null;
   setHandleDragVertex: (handler: (e: LeafletEvent, index?: number) => void) => void;
 }
-export { IDrawShape, IDrawVertices };
+
+interface IDrawManagerEvents {
+  onDrawStart?: Function | null;
+  onEditStart?: Function | null;
+  onCancelEdit?: Function | null;
+  onEdit?: Function | null;
+  onFinish?: Function | null;
+  onAddPoint?: Function | null;
+  onDeletePoint?: Function | null;
+  onDeleteShape?: Function | null;
+  onDragVertexStart?: Function | null;
+  onDragVertex?: Function | null;
+  onDragEndVertex?: Function | null;
+  onDragMidpointVertexStart?: Function | null;
+  onDragMidpointVertex?: Function | null;
+  onDragEndMidpointVertex?: Function | null;
+}
+
+export { IDrawShape, IDrawVertices, IDrawManagerEvents };
