@@ -1,17 +1,20 @@
 import L, { CircleOptions, FeatureGroup, Map, PolylineOptions } from "leaflet";
-import { Shapes } from "../enums/Shapes";
-import { DrawPolygon } from "../Shapes/LineShapes/DrawPolygon";
-import { DrawPolyline } from "../Shapes/LineShapes/DrawPolyline";
-import { DrawManagerMode } from "../enums/DrawManagerMode";
-import { DrawCircle } from "../Shapes/CircularShapes/DrawCircle";
-import { DrawMarker } from "../Shapes/Markers/DrawMarker";
-import { ShapeClass } from "../types/ShapeClass";
-import { ShapeOptions } from "../types/ShapeOptions";
-import { DrawArrowPolyline } from "../Shapes/LineShapes/DrawArrowPolyline";
+import {
+  ShapeClass,
+  ShapeOptions,
+  DrawManagerMode,
+  Shapes,
+  DrawArrowPolyline,
+  DrawMarker,
+  DrawCircle,
+  DrawPolygon,
+  DrawPolyline,
+} from "../";
 
 class ShapeFactory {
   private static instance: ShapeFactory | null = null;
   public static shapeInstance: ShapeClass | null = null;
+  public static _calledFromShapeFactory: boolean = false;
 
   private constructor() {}
 
@@ -32,14 +35,8 @@ class ShapeFactory {
     if (!ShapeFactory.instance) {
       ShapeFactory.instance = new ShapeFactory();
     }
-    return ShapeFactory.instance;
-  }
 
-  /**
-   * Returns the instance of the currently active shape, or null if no shape is active.
-   */
-  static getShapeInstance() {
-    return ShapeFactory.shapeInstance;
+    return ShapeFactory.instance;
   }
 
   /**
@@ -61,8 +58,11 @@ class ShapeFactory {
     if (!getShapeInstanceFunc)
       throw new Error(`No shape instance exists for type ${type}`);
 
+    ShapeFactory._calledFromShapeFactory = true;
     //@ts-ignore
     const newShapeInstance = getShapeInstanceFunc(map, featureGroup, shapeOptions);
+
+    ShapeFactory._calledFromShapeFactory = false; // Reset afterwards
 
     if (!ShapeFactory.shapeInstance) {
       ShapeFactory.shapeInstance = newShapeInstance;
@@ -83,11 +83,10 @@ class ShapeFactory {
   }
 
   /**
-   * Returns an instance of the Polygon shape.
    * @param map The map on which to create the shape.
    * @param featureGroup The feature group to add the shape to.
    * @param polygonOptions The options for the polygon.
-   * @returns An instance of the Polygon shape.
+   * @returns An instance of the DrawPolygon class.
    */
   getPolygonInstance(
     map: Map,
@@ -103,11 +102,10 @@ class ShapeFactory {
   }
 
   /**
-   * Returns an instance of the Polygon shape.
    * @param map The map on which to create the shape.
    * @param featureGroup The feature group to add the shape to.
    * @param polylineOptions The options for the polygon.
-   * @returns An instance of the Polygon shape.
+   * @returns An instance of the DrawPolyline class.
    */
   getPolylineInstance(
     map: Map,
@@ -123,11 +121,10 @@ class ShapeFactory {
   }
 
   /**
-   * Returns an instance of the Circle shape.
    * @param map The map on which to create the shape.
    * @param featureGroup The feature group to add the shape to.
    * @param polylineOptions The options for the circle.
-   * @returns An instance of the Circle shape.
+   * @returns An instance of the DrawCircle class.
    */
   getCircleInstance(
     map: Map,
@@ -142,6 +139,12 @@ class ShapeFactory {
     );
   }
 
+  /**
+   * @param map The map on which to create the shape.
+   * @param featureGroup The feature group to add the shape to.
+   * @param polylineOptions The options for the circle.
+   * @returns An instance of the DrawMarker class.
+   */
   getMarkerInstance(
     map: Map,
     featureGroup: FeatureGroup,
@@ -155,6 +158,13 @@ class ShapeFactory {
     );
   }
 
+  /**
+   * @param map The map on which to create the shape.
+   * @param featureGroup The feature group to add the shape to.
+   * @param polylineOptions The options for the circle.
+   * @returns An instance of the DrawArrowPolyline class.
+   */
+
   getArrowPolylineInstance(
     map: Map,
     featureGroup: FeatureGroup,
@@ -167,7 +177,5 @@ class ShapeFactory {
       polylineOptions
     );
   }
-
-  // TODO: Implement other shapes.
 }
 export { ShapeFactory };

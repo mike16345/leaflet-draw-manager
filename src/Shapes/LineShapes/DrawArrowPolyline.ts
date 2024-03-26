@@ -3,6 +3,7 @@ import { Shapes } from "../../enums/Shapes";
 import { DrawLineShape } from "./DrawLineShape";
 import L, { PathOptions } from "leaflet";
 import "leaflet-polylinedecorator";
+import { DrawShape } from "../DrawShape";
 
 /**
  * Class for drawing an arrow polyline on the map.
@@ -31,6 +32,7 @@ class DrawArrowPolyline extends DrawLineShape<L.Polyline> {
     featureGroup: L.FeatureGroup,
     shapeOptions: L.PolylineOptions
   ): DrawArrowPolyline {
+    DrawShape.validateInstanceCall();
     if (!DrawArrowPolyline.instance) {
       DrawArrowPolyline.instance = new DrawArrowPolyline(
         map,
@@ -95,7 +97,7 @@ class DrawArrowPolyline extends DrawLineShape<L.Polyline> {
     }
   }
 
-  drawArrowHeadToPolyline() {
+  private drawArrowHeadToPolyline() {
     if (!this.currentShape) return;
     this.deleteArrowHead();
     const arrowHead = L.polylineDecorator(this.currentShape, {

@@ -1,5 +1,5 @@
 import { Shapes } from "../enums/Shapes";
-import { IDrawVertices } from "../interfaces/IDrawShape";
+import { IDrawManagerEvents, IDrawVertices } from "../interfaces/IDrawShape";
 import L, { LatLng, LeafletEvent, LeafletMouseEvent } from "leaflet";
 import "../css/DrawManager.css";
 
@@ -36,6 +36,11 @@ class DrawVertices implements IDrawVertices {
    * The type of shape being drawn (e.g., "circle", "rectangle", etc.).
    */
   protected shapeType: Shapes | string;
+
+  /**
+   * Events for dragging vertices.
+   */
+  protected events: IDrawManagerEvents;
 
   /**
    * A function that is called when the user starts dragging the vertices.
@@ -77,6 +82,21 @@ class DrawVertices implements IDrawVertices {
     this.isDragging = false;
     this.latLngs = [];
     this.shapeType = shapeType;
+    this.events = {};
+  }
+
+  on(event: keyof IDrawManagerEvents, callback: Function) {
+    this.events[event] = callback;
+  }
+
+  off(event: keyof IDrawManagerEvents) {
+    this.events[event] = null;
+  }
+
+  fireEvent(event: keyof IDrawManagerEvents, args = []) {
+    if (this.events[event]) {
+      this.events[event](...args);
+    }
   }
 
   /**
