@@ -3,6 +3,20 @@ import { CircleOptions } from "leaflet";
 import { FeatureGroup, useMap } from "react-leaflet";
 import L from "leaflet";
 import { renderToString } from "react-dom/server";
+// for local testing purposes
+// import {
+//   DrawArrowPolyline,
+//   DrawCircle,
+//   DrawLineShape,
+//   DrawManagerMode,
+//   DrawMarker,
+//   DrawPolygon,
+//   DrawPolyline,
+//   LeafletShape,
+//   ShapeFactory,
+//   Shapes,
+//   getShapePositions,
+// } from "../../src/index";
 import {
   DrawArrowPolyline,
   DrawCircle,
@@ -15,7 +29,7 @@ import {
   ShapeFactory,
   Shapes,
   getShapePositions,
-} from "../../src/index";
+} from "leaflet-draw-manager";
 import { FaMapMarkerAlt, FaCheck, FaEraser, FaUndo } from "react-icons/fa";
 import { MdOutlinePolyline } from "react-icons/md";
 import { PiFlowArrowBold } from "react-icons/pi";
@@ -30,7 +44,6 @@ const SketchesToolbar = () => {
   const featureGroup = useRef<L.FeatureGroup | null>(null);
   const divRef = useRef<HTMLDivElement | null>(null);
   const shapeFactory = ShapeFactory.getInstance();
-
   const [sketchType, setSketchType] = useState<Shapes | null>(null);
   const [openToolbar, setOpenToolBar] = useState(false);
 
