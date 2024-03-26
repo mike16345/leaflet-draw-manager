@@ -199,7 +199,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.fireEvent("onDeletePoint", [this.latLngs]);
   }
 
-  handleMouseMove(e) {
+  protected handleMouseMove(e) {
     if (this.drawMode !== DrawManagerMode.DRAW) return;
     this.cursorPosition = e.latlng;
     this.drawDashedPolyline();
@@ -211,7 +211,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.dashedPolyline.element = null;
   }
 
-  drawDashedPolyline() {
+  protected drawDashedPolyline() {
     if (!this.latLngs.length) return;
 
     this.removeDashedPolyline();
@@ -238,19 +238,6 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
       ...this.currentShape.options,
       [attribute]: value,
     });
-
-    // if (attribute == "weight") {
-    //   this.currentShadowEntity?.setStyle({
-    //     ...this.currentShadowEntity.options,
-    //     [attribute]: value + 3,
-    //   });
-    //   return;
-    // }
-
-    // this.currentShadowEntity?.setStyle({
-    //   ...this.currentShadowEntity.options,
-    //   [attribute]: value,
-    // });
   }
 }
 

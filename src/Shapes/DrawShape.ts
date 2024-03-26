@@ -109,15 +109,32 @@ class DrawShape<T extends LeafletShape> {
     }
   }
 
-  on(event: keyof IDrawManagerEvents, callback: Function) {
+  /**
+   * Sets a custom event handler for the shape.
+   *
+   * @param event The name of the event to listen for.
+   * @param callback The function to call when the event is triggered.
+   */
+  on(event: keyof IDrawManagerEvents, callback: Function): void {
     this.events[event] = callback;
   }
 
-  off(event: keyof IDrawManagerEvents) {
+  /**
+   * Removes an event handler from the shape.
+   *
+   * @param event The name of the event to stop listening for.
+   */
+  off(event: keyof IDrawManagerEvents): void {
     this.events[event] = null;
   }
 
-  protected fireEvent(event: keyof IDrawManagerEvents, args = []) {
+  /**
+   * Fires an event with the specified arguments.
+   *
+   * @param event The name of the event to fire.
+   * @param args The arguments to pass to the event handler.
+   */
+  protected fireEvent(event: keyof IDrawManagerEvents, args: any[] = []): void {
     if (this.events[event]) {
       this.events[event](...args);
     }
@@ -156,8 +173,7 @@ class DrawShape<T extends LeafletShape> {
 
   /**
    * Sets a custom click handler for the shape.
-   *
-   * @param clickHandler The custom click handler.
+   * @deprecated This method is deprecated and will be removed in the next major version.
    */
   setCustomOnClickHandler(clickHandler: (latLngs: LatLng[]) => void) {
     this.onClickHandler = clickHandler;
@@ -165,8 +181,8 @@ class DrawShape<T extends LeafletShape> {
 
   /**
    * Sets a custom finish handler for the shape.
+   * @deprecated This method is deprecated and will be removed in the next major version.
    *
-   * @param onFinishHandler The custom finish handler.
    */
   setCustomOnFinishHandler(onFinishHandler: (shape: T | null) => void) {
     this.onFinishHandler = onFinishHandler;
@@ -175,7 +191,7 @@ class DrawShape<T extends LeafletShape> {
   /**
    * Sets a custom cancel edit handler for the shape.
    *
-   * @param onCancelEditHandler The custom cancel edit handler.
+   * @deprecated This method is deprecated and will be removed in the next major version.
    */
   setOnCancelEditHandler(onCancelEditHandler: (shape: T | null) => void) {
     this.onCancelEditHandler = onCancelEditHandler;
