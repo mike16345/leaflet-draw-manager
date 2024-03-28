@@ -5,7 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.0.0] - unreleased
+## [2.1.0] - released
+
+### Added
+
+- Added flag for displaying vertex numbers (default=disabled).
+- Added class config in shape factory for more comfortable coding. See Docs for more info.
+- Added option to set polygon drag icon.
+- Added option to set vertex icon.
+- Added option to set midpoint vertex icon.
+
+### Added Back
+
+-
+
+### Changed
+
+- Display line distances is disabled by default.
+
+### Fixed
+
+- LineShapes disappearing on start edit.
+- Circle mousemove functionality on computer.
+- Cancelling edit after dragging polygon works properly now.
+
+## [2.0.0] - released
 
 ### Added
 
@@ -28,7 +52,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- 
+-
 
 ## [1.0.1] - released
 
