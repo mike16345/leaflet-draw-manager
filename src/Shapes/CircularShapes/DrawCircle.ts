@@ -33,11 +33,6 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
   protected markerGroup: FeatureGroup;
 
   /**
-   * A flag indicating whether the device is a touch screen.
-   */
-  protected isTouchScreen: boolean;
-
-  /**
    * The vertices of the drawn circle.
    */
   protected vertices: DrawCircularVertices;
@@ -60,7 +55,6 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     this.markerGroup = L.featureGroup();
     this.markerGroup.addTo(this.map);
     this.cursorPosition = new LatLng(0.0, 0.0);
-    this.isTouchScreen = true;
     this.vertices = new DrawCircularVertices(this.map, Shapes.CIRCLE);
   }
 
@@ -207,14 +201,17 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    * @returns The drawn circle.
    */
   drawShape(latLngs: L.LatLng[] | null = null) {
-    const firstPoint = (latLngs && latLngs[0]) || this.latLngs[0];
-    const secondPoint = (latLngs && latLngs[1]) || this.latLngs[1];
-    const distance = firstPoint.distanceTo(secondPoint);
-
+    var distance = 0;
     const circle = L.circle(
       (latLngs && latLngs[0]) || this.latLngs[0],
       this.shapeOptions
     );
+    const firstPoint = (latLngs && latLngs[0]) || this.latLngs[0];
+    const secondPoint = (latLngs && latLngs[1]) || this.latLngs[1];
+    if (firstPoint && secondPoint) {
+      distance = firstPoint.distanceTo(secondPoint);
+    }
+
     circle.setRadius(distance);
     circle.addTo(this.featureGroup);
 
@@ -225,19 +222,26 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    * Redraws the drawn circle on the map.
    */
   redrawShape() {
-    if (this.latLngs.length == 2 && !this.currentShape) {
-      this.currentShape = this.drawShape();
+    if (!this.currentShape) {
+      if (
+        (this.latLngs.length == 1 && !this.isTouchDevice) ||
+        (this.latLngs.length == 2 && this.isTouchDevice)
+      ) {
+        this.currentShape = this.drawShape();
+      }
     }
 
-    if (!this.currentShape) return;
+    if (!this.currentShape && this.isTouchDevice) return;
     if (!this.featureGroup.hasLayer(this.currentShape)) {
       this.featureGroup.addLayer(this.currentShape);
     }
-
     const radius = this.calculateRadius();
     if (radius) this.currentShape.setRadius(radius);
 
     this.currentShape.setLatLng(this.latLngs[0]);
+    if (this.drawMode === DrawManagerMode.EDIT) {
+      this.fireEvent("onEdit", [this.latLngs]);
+    }
   }
 
   /**
@@ -262,12 +266,15 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
         }
         break;
       default:
-        if (!this.isTouchScreen)
+        if (!this.isTouchDevice) {
+          console.log("here");
           positionFrom = new LatLng(
             this.cursorPosition.lat,
             this.cursorPosition.lng
           );
-        else positionFrom = this.latLngs[1];
+        } else {
+          positionFrom = this.latLngs[1];
+        }
 
         radius = positionFrom.distanceTo(this.latLngs[0]);
         break;
@@ -303,7 +310,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    */
   initDrawEvents(): void {
     this.map.on("click", this.handleMapClick.bind(this));
-    if (!this.isTouchScreen)
+    if (!this.isTouchDevice)
       this.map.on("mousemove", this.handleMapMouseMove.bind(this));
   }
 
@@ -313,6 +320,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    */
   protected handleMapMouseMove(e: LeafletMouseEvent): void {
     this.cursorPosition = e.latlng;
+
     if (this.latLngs.length == 1) {
       this.redrawShape();
     }
@@ -324,11 +332,13 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    */
   protected handleMapClick(e: LeafletMouseEvent): void {
     this.latLngs.push(e.latlng);
+    this.fireEvent("onAddPoint", [this.latLngs]);
+    if (this.latLngs.length <= 2) this.redrawShape();
 
-    if (this.onClickHandler) {
-      this.onClickHandler(this.latLngs);
+    if (this.latLngs.length == 2) {
+      this.map.off("click", this.handleMapClick.bind(this));
+      this.map.off("mousemove", this.handleMapMouseMove.bind(this));
     }
-    this.redrawShape();
   }
 }
 
