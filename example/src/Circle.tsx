@@ -18,7 +18,6 @@ const CirclesInMap = () => {
       circleGroup.current,
       circleOptions
     );
-    console.log("start drawing");
     drawCircle.current.startDrawing();
     drawCircle.current.setCustomOnFinishHandler((circle: Circle | null) => {
       latestCircle.current = circle;

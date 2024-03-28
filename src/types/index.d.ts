@@ -3,12 +3,14 @@ export interface CustomShapeOptions {
   text?: string;
   color?: string;
 }
+
 interface CustomShape {
   transparentPolyline?: L.Polyline;
   numberedMarkers?: Marker[];
   attachedPolyline?: L.Polyline;
   arrowHead: L.PolylineDecorator;
 }
+
 declare module "leaflet" {
   interface Polygon extends CustomShape {}
   interface Marker extends CustomShape {}
