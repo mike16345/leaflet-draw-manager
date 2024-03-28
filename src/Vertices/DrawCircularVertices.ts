@@ -139,6 +139,7 @@ class DrawCircularVertices extends DrawVertices {
       this.drawCenterVertex(this.latLngs[0]);
     } else if (this.latLngs.length == 2) {
       this.drawOuterVertex(this.latLngs[1]);
+      this.map.off("click", this.handleMapClick.bind(this));
     }
   }
 
