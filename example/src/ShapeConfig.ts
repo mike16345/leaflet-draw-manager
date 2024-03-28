@@ -16,7 +16,7 @@ const vertexIcon = L.divIcon({
 
 const midvertexIcon = L.divIcon({
   className: "text-lg ",
-  html: `midpoint`,
+  html: `Midpoint`,
   iconSize: L.point(28, 28),
 });
 
@@ -25,8 +25,8 @@ export const shapeClassConfig: IShapeClassConfig = {
   displayVertexNumbers: true,
   isTouchDevice: false,
   isDraggable: true,
-  vertexIcon: vertexIcon,
-  midpointIcon: midvertexIcon,
+  vertexIcon: null,
+  midpointIcon: null,
   polygonDragIcon: polygonDragIcon,
   events: {},
 };

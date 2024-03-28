@@ -43,26 +43,14 @@ class DrawVertices implements IDrawVertices {
   protected events: IDrawManagerEvents;
 
   /**
-   * A function that is called when the user starts dragging the vertices.
+   * Icon for midpoint vertices.
    */
-  handleOnDragStart: (() => void) | null;
+  protected midpointVertexIcon: L.Icon | L.DivIcon | null;
 
   /**
-   * A function that is called when the user stops dragging the vertices.
+   * Icon for vertices.
    */
-  handleOnDragEnd: (() => void) | null;
-
-  /**
-   * A function that is called when the user drags a vertex.
-   */
-  handleDragVertex: ((e: LeafletEvent, index?: number) => void) | null;
-
-  /**
-   * A function that is called when the user drags a midpoint vertex.
-   */
-  handleDragMidpoint:
-    | ((e: LeafletEvent, index?: number, insert?: boolean) => void)
-    | null;
+  protected vertexIcon: L.Icon | L.DivIcon | null;
 
   /**
    * Creates a new DrawVertices instance.
@@ -75,13 +63,11 @@ class DrawVertices implements IDrawVertices {
     this.vertices.addTo(this.map);
     this.midpointVertices = L.featureGroup();
     this.midpointVertices.addTo(this.map);
-    this.handleOnDragStart = null;
-    this.handleDragVertex = null;
-    this.handleOnDragEnd = null;
-    this.handleDragMidpoint = null;
     this.isDragging = false;
     this.latLngs = [];
     this.shapeType = shapeType;
+    this.vertexIcon = null;
+    this.midpointVertexIcon = null;
     this.events = {};
   }
 
@@ -111,22 +97,6 @@ class DrawVertices implements IDrawVertices {
    */
   handleTouchEnd() {
     this.map.dragging.enable();
-  }
-
-  /**
-   * Sets the function that is called when the user drags a vertex.
-   * @param dragHandler The function that is called when the user drags a vertex.
-   */
-  setHandleDragVertex(dragHandler: (e: L.LeafletEvent, index?: number) => void) {
-    this.handleDragVertex = dragHandler;
-  }
-
-  /**
-   * Sets the function that is called when the user drags a midpoint vertex.
-   * @param handler The function that is called when the user drags a midpoint vertex.
-   */
-  setHandleDragMidpointVertex(handler: any) {
-    this.handleDragMidpoint = handler;
   }
 
   /**
@@ -171,6 +141,14 @@ class DrawVertices implements IDrawVertices {
 
     if (lastMidpoint) this.midpointVertices.removeLayer(lastMidpoint);
     if (lastVertex) this.vertices.removeLayer(lastVertex);
+  }
+
+  setVertexIcon(icon: L.Icon | L.DivIcon | null) {
+    this.vertexIcon = icon;
+  }
+
+  setMidpointVertexIcon(icon: L.Icon | L.DivIcon | null) {
+    this.midpointVertexIcon = icon;
   }
 
   /**

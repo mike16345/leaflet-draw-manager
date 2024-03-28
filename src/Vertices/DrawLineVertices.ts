@@ -33,13 +33,17 @@ class DrawLineVertices extends DrawVertices {
    * @param index The index of the vertex.
    */
   drawVertex(latLng: LatLng, index: number) {
-    const vertexMarker = L.marker(latLng, {
-      draggable: true,
-      icon: L.divIcon({
+    const vertexIcon =
+      this.vertexIcon ||
+      L.divIcon({
         className: "hit-box vertex-marker",
         html: `${this.displayVertexNumbers ? index + 1 : ""}`,
         iconSize: L.point(24, 24),
-      }),
+      });
+
+    const vertexMarker = L.marker(latLng, {
+      draggable: true,
+      icon: vertexIcon,
     });
 
     vertexMarker.on("dragstart", () => {
@@ -96,13 +100,16 @@ class DrawLineVertices extends DrawVertices {
       (midpointLayer as L.Marker).setLatLng(midpoint);
       return;
     }
+    const vertexIcon =
+      this.midpointVertexIcon ||
+      L.divIcon({
+        className: "hit-box vertex-marker midpoint-marker",
+        iconSize: L.point(20, 20),
+      });
 
     const midpointMarker = L.marker(midpoint, {
       draggable: true,
-      icon: L.divIcon({
-        className: "hit-box vertex-marker midpoint-marker",
-        iconSize: L.point(20, 20),
-      }),
+      icon: vertexIcon,
     });
 
     if (this.displayDistances) {

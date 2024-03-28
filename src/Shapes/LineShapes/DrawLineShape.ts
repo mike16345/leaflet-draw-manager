@@ -1,5 +1,5 @@
 import { DrawShape } from "../DrawShape";
-import L, { LeafletMouseEvent, LatLng, PolylineOptions } from "leaflet";
+import L, { LeafletMouseEvent, LatLng, PolylineOptions, icon } from "leaflet";
 import { DrawManagerMode } from "../../enums/DrawManagerMode";
 import { Shapes } from "../../enums/Shapes";
 import { IDrawManagerEvents, IDrawShape } from "../../interfaces/IDrawShape";
@@ -245,6 +245,18 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
    */
   setDisplayVertexNumbers(display: boolean) {
     this.vertices.setDisplayVertexNumbers(display);
+  }
+
+  override setVertexIcon(vertexIcon: L.Icon<L.IconOptions> | L.DivIcon): void {
+    super.setVertexIcon(vertexIcon);
+    this.vertices.setVertexIcon(vertexIcon);
+  }
+
+  override setMidpointVertexIcon(
+    midpointIcon: L.Icon<L.IconOptions> | L.DivIcon
+  ): void {
+    super.setMidpointVertexIcon(midpointIcon);
+    this.vertices.setMidpointVertexIcon(midpointIcon);
   }
 }
 

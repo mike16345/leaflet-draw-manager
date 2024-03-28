@@ -76,6 +76,11 @@ class ShapeClassConfig {
     shapeClass.setMidpointVertexIcon(config.midpointIcon);
     shapeClass.setVertexIcon(config.vertexIcon);
 
+    if (shapeClass.hasOwnProperty("vertices")) {
+      shapeClass.setVertexIcon(config.vertexIcon);
+      shapeClass.setMidpointVertexIcon(config.midpointIcon);
+    }
+
     if (shapeClass instanceof DrawLineShape) {
       shapeClass.setDisplayVertexNumbers(config.displayVertexNumbers);
       shapeClass.displayLineDistances(config.displayLineDistances);

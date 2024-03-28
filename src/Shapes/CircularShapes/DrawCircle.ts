@@ -340,6 +340,18 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
       this.map.off("mousemove", this.handleMapMouseMove.bind(this));
     }
   }
+
+  override setVertexIcon(vertexIcon: L.Icon<L.IconOptions> | L.DivIcon): void {
+    super.setVertexIcon(vertexIcon);
+    this.vertices.setVertexIcon(vertexIcon);
+  }
+
+  override setMidpointVertexIcon(
+    midpointIcon: L.Icon<L.IconOptions> | L.DivIcon
+  ): void {
+    super.setMidpointVertexIcon(midpointIcon);
+    this.vertices.setMidpointVertexIcon(midpointIcon);
+  }
 }
 
 export { DrawCircle };
