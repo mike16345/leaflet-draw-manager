@@ -1,6 +1,6 @@
+import { DrawShape } from "../DrawShape";
 import L, { LeafletMouseEvent, LatLng, PolylineOptions } from "leaflet";
 import { DrawManagerMode } from "../../enums/DrawManagerMode";
-import { DrawShape } from "../DrawShape";
 import { Shapes } from "../../enums/Shapes";
 import { IDrawManagerEvents, IDrawShape } from "../../interfaces/IDrawShape";
 import { DrawLineVertices } from "../../Vertices/DrawLineVertices";
@@ -60,18 +60,16 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
   }
 
   cancelEdit() {
-    this.latLngs = [...this.preEditLatLngs];
+    this.latLngs = structuredClone(this.preEditLatLngs);
     this.redrawShape();
-    if (this.onCancelEditHandler) {
-      this.onCancelEditHandler(this.currentShape);
-    }
-    this.onFinishHandler = null;
+    this.fireEvent("onCancelEdit", [this.currentShape]);
+    this.off("onFinish");
     this.stopDrawing();
   }
 
   override stopDrawing() {
     if (this.drawMode === DrawManagerMode.EDIT && this.currentShape) {
-      this.currentShape.setStyle({
+      this.setShapeOptions({
         ...this.currentShape.options,
         fillOpacity: 0.2,
         dashArray: undefined,
@@ -93,9 +91,9 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.currentShape = shape;
     this.featureGroup.addLayer(this.currentShape);
     this.latLngs = getShapePositions(shape);
-    this.preEditLatLngs = [...this.latLngs];
+    this.preEditLatLngs = structuredClone(this.latLngs);
 
-    this.currentShape.setStyle({
+    this.setShapeOptions({
       ...this.currentShape.options,
       dashArray: "12,12",
       fillOpacity: 0.3,
@@ -103,7 +101,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
 
     this.redrawShape();
     this.vertices.clearAllVertices();
-    this.vertices.setLatLngs = [...this.latLngs];
+    this.vertices.setLatLngs = structuredClone(this.latLngs);
     this.setVerticesEvents();
     this.vertices.drawVertices();
     this.vertices.drawMidpointVertices();
@@ -119,7 +117,9 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     if (!this.featureGroup.hasLayer(this.currentShape)) {
       this.featureGroup.addLayer(this.currentShape);
     }
-
+    if (this.drawMode === DrawManagerMode.EDIT) {
+      this.fireEvent("onEdit", [this.latLngs]);
+    }
     this.currentShape.setLatLngs(this.latLngs);
 
     return this.currentShape;
@@ -149,7 +149,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
   setLatLngs(latLngs: LatLng[]): void {
     this.latLngs = latLngs;
     this.vertices.clearAllVertices();
-    this.vertices.setLatLngs = [...latLngs];
+    this.vertices.setLatLngs = structuredClone(latLngs);
     this.vertices.drawVertices();
     this.vertices.drawMidpointVertices();
     this.redrawShape();
@@ -169,8 +169,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
   }
 
   override setShapeOptions(options: L.PolylineOptions): void {
-    super.setShapeOptions(options);
-    this.currentShape?.setStyle(options);
+    this.currentShape.setStyle(options);
   }
 
   initDrawEvents(): void {
@@ -238,6 +237,14 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
       ...this.currentShape.options,
       [attribute]: value,
     });
+  }
+
+  /**
+   * Sets the option to display the numbers of the vertices and redraws them.
+   * @param display Flag to set display.
+   */
+  setDisplayVertexNumbers(display: boolean) {
+    this.vertices.setDisplayVertexNumbers(display);
   }
 }
 

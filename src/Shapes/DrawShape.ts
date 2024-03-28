@@ -53,21 +53,6 @@ class DrawShape<T extends LeafletShape> {
   protected shapeType: Shapes | string;
 
   /**
-   * A callback function to handle click events on the map, receiving an array of LatLng objects.
-   */
-  protected onClickHandler: ((latLngs: L.LatLng[]) => void) | null;
-
-  /**
-   * A callback function to handle the completion of drawing or editing, receiving the final shape or `null`.
-   */
-  protected onFinishHandler: ((shape: T | null) => void) | null;
-
-  /**
-   * A callback function to handle the cancellation of shape editing, receiving the current shape or `null`.
-   */
-  protected onCancelEditHandler: ((shape: T | null) => void) | null;
-
-  /**
    * Flag indicating whether it is a touch device or not.
    */
   protected isTouchDevice: boolean;
@@ -76,6 +61,21 @@ class DrawShape<T extends LeafletShape> {
    * Mapped events for custom behavior.
    */
   protected events: IDrawManagerEvents;
+
+  /**
+   * Flag indicating whether the shape should be draggable applies to (Markers/Polygon).
+   */
+  protected isDraggable: boolean;
+
+  /**
+   * Icon for vertices that are used when drawing/editing a shape.
+   */
+  protected vertexIcon: L.Icon | L.DivIcon | null;
+
+  /**
+   * Icon for midpoint vertices that are used when drawing/editing a shape.
+   */
+  protected midpointVertexIcon: L.Icon | L.DivIcon | null;
 
   /**
    * Creates a new DrawShape instance.
@@ -95,10 +95,10 @@ class DrawShape<T extends LeafletShape> {
     this.cursorPosition = new LatLng(0.0, 0.0);
     this.shapeType = "";
     this.isTouchDevice = false;
-    this.onClickHandler = null;
-    this.onFinishHandler = null;
-    this.onCancelEditHandler = null;
     this.events = {};
+    this.vertexIcon = null;
+    this.midpointVertexIcon = null;
+    this.isDraggable = false;
   }
 
   protected static validateInstanceCall() {
@@ -146,7 +146,6 @@ class DrawShape<T extends LeafletShape> {
   stopDrawing() {
     this.drawMode = DrawManagerMode.STOP;
     this.disableDrawEvents();
-
     this.fireEvent("onFinish", [this.currentShape]);
 
     this.currentShape = null;
@@ -175,27 +174,21 @@ class DrawShape<T extends LeafletShape> {
    * Sets a custom click handler for the shape.
    * @deprecated This method is deprecated and will be removed in the next major version.
    */
-  setCustomOnClickHandler(clickHandler: (latLngs: LatLng[]) => void) {
-    this.onClickHandler = clickHandler;
-  }
+  setCustomOnClickHandler(clickHandler: (latLngs: LatLng[]) => void) {}
 
   /**
    * Sets a custom finish handler for the shape.
    * @deprecated This method is deprecated and will be removed in the next major version.
    *
    */
-  setCustomOnFinishHandler(onFinishHandler: (shape: T | null) => void) {
-    this.onFinishHandler = onFinishHandler;
-  }
+  setCustomOnFinishHandler(onFinishHandler: (shape: T | null) => void) {}
 
   /**
    * Sets a custom cancel edit handler for the shape.
    *
    * @deprecated This method is deprecated and will be removed in the next major version.
    */
-  setOnCancelEditHandler(onCancelEditHandler: (shape: T | null) => void) {
-    this.onCancelEditHandler = onCancelEditHandler;
-  }
+  setOnCancelEditHandler(onCancelEditHandler: (shape: T | null) => void) {}
 
   setIsTouchDevice(isTouchDevice: boolean) {
     this.isTouchDevice = isTouchDevice;
@@ -225,6 +218,18 @@ class DrawShape<T extends LeafletShape> {
   setShapeOptions(shapeOptions: ShapeOptions) {
     if (!this.currentShape) return;
     this.currentShape.options = shapeOptions;
+  }
+
+  setIsDraggable(isDraggable: boolean) {
+    this.isDraggable = isDraggable;
+  }
+
+  setVertexIcon(vertexIcon: L.DivIcon | L.Icon | null) {
+    this.vertexIcon = vertexIcon;
+  }
+
+  setMidpointVertexIcon(midpointVertexIcon: L.DivIcon | L.Icon | null) {
+    this.midpointVertexIcon = midpointVertexIcon;
   }
 }
 
