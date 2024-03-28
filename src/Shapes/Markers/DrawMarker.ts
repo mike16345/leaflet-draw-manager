@@ -6,11 +6,6 @@ class DrawMarker extends DrawShape<L.Marker> {
   private static instance: DrawMarker | null = null;
 
   /**
-   * Flag indicating whether the marker should be draggable.
-   */
-  protected isDraggable: boolean;
-
-  /**
    * The options for the icon shape.
    */
   protected shapeOptions: L.MarkerOptions;
@@ -34,7 +29,6 @@ class DrawMarker extends DrawShape<L.Marker> {
   ) {
     super(map, featureGroup);
     this.shapeOptions = shapeOptions;
-    this.isDraggable = true;
     this.isTextMarker = false;
   }
 
@@ -96,18 +90,14 @@ class DrawMarker extends DrawShape<L.Marker> {
 
   cancelEdit() {
     if (!this.currentShape) return;
-
     this.currentShape.setLatLng(this.preEditLatLngs[0]);
-    if (this.onCancelEditHandler) {
-      this.onCancelEditHandler(this.currentShape);
-    }
+    this.fireEvent("onCancelEdit", [this.currentShape]);
     this.stopDrawing();
   }
 
   override deleteShape(): void {
     super.deleteShape();
     this.stopDrawing();
-    this.resetInstance();
   }
 
   /**
@@ -148,6 +138,7 @@ class DrawMarker extends DrawShape<L.Marker> {
         }"/>`,
       }),
     });
+    marker.on("drag", (e: any) => this.fireEvent("onEdit", [[e.latlng]]));
     marker.addTo(this.featureGroup);
 
     (
@@ -167,9 +158,7 @@ class DrawMarker extends DrawShape<L.Marker> {
     if (!this.latLngs.length) {
       this.latLngs.push(e.latlng);
       this.currentShape = this.drawShape();
-      if (this.onClickHandler) {
-        this.onClickHandler(this.latLngs);
-      }
+      this.fireEvent("onAddPoint", [this.latLngs]);
     }
   }
 
@@ -185,9 +174,15 @@ class DrawMarker extends DrawShape<L.Marker> {
     this.currentShape.setIcon(icon);
   }
 
+  /**
+   * Sets the options for the marker and redraws the marker with the new options.
+   * @param options The options to set.
+   */
   override setShapeOptions(options: L.MarkerOptions): void {
     if (!this.currentShape) return;
-    this.currentShape.options = options;
+    this.shapeOptions = options;
+    this.featureGroup.removeLayer(this.currentShape);
+    this.drawShape();
   }
 
   setLatLng(latLng: LatLng) {
