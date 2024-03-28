@@ -9,14 +9,104 @@ import {
   DrawCircle,
   DrawPolygon,
   DrawPolyline,
+  DrawLineShape,
 } from "../";
+import { IShapeClassConfig } from "../interfaces/IShapeClassConfig";
+import { IDrawManagerEvents } from "../interfaces/IDrawShape";
+
+/**
+ * The default configuration for each shape class.
+ */
+const DEFAULT_CONFIG: IShapeClassConfig = {
+  displayLineDistances: false,
+  displayVertexNumbers: false,
+  isTouchDevice: false,
+  isDraggable: false,
+  vertexIcon: null,
+  midpointIcon: null,
+  polygonDragIcon: null,
+  events: null,
+};
+
+/**
+ * Manages the configuration for each shape class.
+ */
+class ShapeClassConfig {
+  /**
+   * The configuration for each shape class.
+   */
+  private classConfig: IShapeClassConfig = {
+    displayLineDistances: false,
+    displayVertexNumbers: false,
+    isTouchDevice: false,
+    isDraggable: false,
+    vertexIcon: null,
+    midpointIcon: null,
+    polygonDragIcon: null,
+    events: null,
+  };
+
+  public constructor(config?: IShapeClassConfig) {
+    this.classConfig = config || DEFAULT_CONFIG;
+  }
+
+  /**
+   * Updates the configuration for a specific shape class.
+   * @param config - The new configuration for the shape class.
+   * @param shapeClass - The shape class to update.
+   */
+  setClassConfig(config: IShapeClassConfig, shapeClass?: ShapeClass): void {
+    this.classConfig = config;
+    if (!shapeClass) return;
+    this.updateShapeClassConfig(config, shapeClass);
+  }
+
+  /**
+   * Updates the configuration for a specific shape class.
+   * @param config - The new configuration for the shape class.
+   * @param shapeClass - The shape class to update.
+   */
+  private updateShapeClassConfig(
+    config: IShapeClassConfig,
+    shapeClass: ShapeClass
+  ): void {
+    if (!shapeClass) return;
+    shapeClass.setIsTouchDevice(config.isTouchDevice);
+    shapeClass.setIsDraggable(config.isDraggable);
+    shapeClass.setMidpointVertexIcon(config.midpointIcon);
+    shapeClass.setVertexIcon(config.vertexIcon);
+
+    if (shapeClass instanceof DrawLineShape) {
+      shapeClass.setDisplayVertexNumbers(config.displayVertexNumbers);
+      shapeClass.displayLineDistances(config.displayLineDistances);
+    }
+
+    if (shapeClass instanceof DrawPolygon) {
+      shapeClass.setDragIcon(config.polygonDragIcon);
+    }
+
+    if (config.events) {
+      Object.keys(config.events).forEach((key) => {
+        if (config.events[key])
+          shapeClass.on(key as keyof IDrawManagerEvents, config.events[key]);
+      });
+    }
+  }
+
+  getClassConfig(): IShapeClassConfig {
+    return this.classConfig;
+  }
+}
 
 class ShapeFactory {
   private static instance: ShapeFactory | null = null;
   public static shapeInstance: ShapeClass | null = null;
   public static _calledFromShapeFactory: boolean = false;
+  private shapeClassConfig: ShapeClassConfig;
 
-  private constructor() {}
+  private constructor(classConfig?: IShapeClassConfig) {
+    this.shapeClassConfig = new ShapeClassConfig(classConfig);
+  }
 
   private shapeInstances = {
     [Shapes.POLYGON]: DrawPolygon.getInstance,
@@ -31,12 +121,20 @@ class ShapeFactory {
    * Creates a new instance of the ShapeFactoryClass if it hasn't been created yet,
    * and returns the existing instance.
    */
-  static getInstance(): ShapeFactory {
+  static getInstance(classConfig?: IShapeClassConfig): ShapeFactory {
     if (!ShapeFactory.instance) {
-      ShapeFactory.instance = new ShapeFactory();
+      ShapeFactory.instance = new ShapeFactory(classConfig);
     }
 
     return ShapeFactory.instance;
+  }
+
+  /**
+   * Sets the class configuration for the shape classes.
+   * @param config The class configuration object.
+   */
+  setShapeConfig(config: IShapeClassConfig): void {
+    this.shapeClassConfig.setClassConfig(config, ShapeFactory.shapeInstance);
   }
 
   /**
@@ -59,7 +157,6 @@ class ShapeFactory {
       throw new Error(`No shape instance exists for type ${type}`);
 
     ShapeFactory._calledFromShapeFactory = true;
-    //@ts-ignore
     const newShapeInstance = getShapeInstanceFunc(map, featureGroup, shapeOptions);
 
     ShapeFactory._calledFromShapeFactory = false; // Reset afterwards
@@ -78,6 +175,8 @@ class ShapeFactory {
       ShapeFactory.shapeInstance.resetInstance();
       ShapeFactory.shapeInstance = newShapeInstance;
     }
+    const classConfig = this.shapeClassConfig.getClassConfig();
+    this.setShapeConfig(classConfig);
 
     return ShapeFactory.shapeInstance as T;
   }
@@ -164,7 +263,6 @@ class ShapeFactory {
    * @param polylineOptions The options for the circle.
    * @returns An instance of the DrawArrowPolyline class.
    */
-
   getArrowPolylineInstance(
     map: Map,
     featureGroup: FeatureGroup,
