@@ -18,7 +18,9 @@
   },
   "keywords": [
     "leaflet",
-    "draw"
+    "draw",
+    "map",
+    "manage"
   ],
   "author": "Michael Gani",
   "license": "ISC",
