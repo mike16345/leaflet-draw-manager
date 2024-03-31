@@ -24,7 +24,117 @@ _(Work in Progress)_
 
 ## Basic Usage
 
-_(To be filled)_
+This can be replaced with any class. Note: Not all classes have the handleUndoClick method.
+
+```javascript
+// App.tsx
+
+import "./App.css";
+import { MapContainer, TileLayer } from "react-leaflet";
+import CirclesInMap from "./Circle";
+
+function App() {
+  const position = { lat: 44.5, lng: -89.5 };
+
+  return (
+    <>
+      <MapContainer
+        className="map map-container z-[1]"
+        minZoom={6}
+        zoom={14}
+        zoomControl={false}
+        center={position}
+        scrollWheelZoom={true}
+      >
+        <TileLayer
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          // tms={true}
+          maxNativeZoom={16}
+          maxZoom={20}
+        />
+        <CirclesInMap />
+      </MapContainer>
+    </>
+  );
+}
+
+export default App;
+```
+
+```javascript
+// CirclesInMap.tsx
+
+import { useRef } from "react";
+import L, { Circle, CircleOptions } from "leaflet";
+import { FeatureGroup, useMap } from "react-leaflet";
+import { ShapeFactory, DrawCircle } from "leaflet-draw-manager";
+
+const CirclesInMap = () => {
+  const map = useMap();
+  const circleGroup = useRef < L.FeatureGroup > null;
+  const circleOptions: CircleOptions = { color: "red", radius: 0 };
+  const shapeFactory = ShapeFactory.getInstance();
+  const drawCircle = (useRef < DrawCircle) | (null > null);
+  const latestCircle = (useRef < Circle) | (null > null);
+
+  const handleDrawCircle = () => {
+    if (!circleGroup.current) return;
+    drawCircle.current = shapeFactory.getCircleInstance(
+      map,
+      circleGroup.current,
+      circleOptions
+    );
+    drawCircle.current.startDrawing();
+    drawCircle.current.setCustomOnFinishHandler((circle: Circle | null) => {
+      latestCircle.current = circle;
+    });
+  };
+
+  const handleEditCircle = () => {
+    if (!drawCircle.current || !latestCircle.current) return;
+
+    drawCircle.current.editShape(latestCircle.current);
+  };
+
+  const handleDeleteCircle = () => {
+    if (!drawCircle.current) return;
+    drawCircle.current.deleteShape();
+  };
+
+  const handleStopDrawing = () => {
+    if (!drawCircle.current) return;
+    drawCircle.current.stopDrawing();
+  };
+
+  const handleCancelEdit = () => {
+    if (!drawCircle.current) return;
+    drawCircle.current.cancelEdit();
+  };
+
+  return (
+    <div className="draw-container">
+      <button onClick={handleDrawCircle} className="draw-button">
+        Draw Circle
+      </button>
+      <button onClick={handleStopDrawing} className="draw-button">
+        Stop Drawing
+      </button>
+      <button onClick={handleEditCircle} className="draw-button">
+        Edit Circle
+      </button>
+      <button onClick={handleCancelEdit} className="draw-button">
+        Cancel Edit
+      </button>
+      <button onClick={handleDeleteCircle} className="draw-button">
+        Delete Circle
+      </button>
+      <FeatureGroup ref={circleGroup}></FeatureGroup>
+    </div>
+  );
+};
+
+export default CirclesInMap;
+```
 
 ## Custom Event Handlers
 
@@ -46,68 +156,3 @@ _(To be filled)_
 | `onCancelEdit`              | Fired when the cancelEdit() method is called. The shape object after the canceled edit is provided as a parameter.                               | `shapeInstance.on("onCancelEdit", (shape: LeafletShape \| null) => { /* Your code here */ });`  |
 
 ## Usage/Examples
-
-```javascript
-// Import necessary dependencies
-import { useRef, useState } from "react";
-import { CircleOptions } from "leaflet";
-import { FeatureGroup, useMap } from "react-leaflet";
-import L from "leaflet";
-import { renderToString } from "react-dom/server";
-import {
-  DrawArrowPolyline,
-  DrawCircle,
-  DrawLineShape,
-  DrawManagerMode,
-  DrawMarker,
-  DrawPolygon,
-  DrawPolyline,
-  LeafletShape,
-  ShapeFactory,
-  Shapes,
-  getShapePositions,
-} from "leaflet-draw-manager";
-import { BsChatSquareTextFill } from "react-icons/bs";
-import { FaMapMarkerAlt, FaCheck, FaEraser, FaUndo } from "react-icons/fa";
-import { MdOutlinePolyline } from "react-icons/md";
-import { PiFlowArrowBold } from "react-icons/pi";
-import { RiSketching } from "react-icons/ri";
-import { TbPolygon, TbCircleDashed } from "react-icons/tb";
-import ControlBtn from "./ControlsBtn";
-import { Else, If, Then, When } from "react-if";
-
-// Define SketchesToolbar component
-const SketchesToolbar = () => {
-  // Initialize map and featureGroup references
-  const map = useMap();
-  const featureGroup = useRef<L.FeatureGroup | null>(null);
-  const shapeFactory = ShapeFactory.getInstance();
-
-  // Define state variables
-  const [sketchType, setSketchType] = useState<Shapes | null>(null);
-  const [openToolbar, setOpenToolBar] = useState(false);
-
-  // Define drawTypes array
-  const drawTypes = [
-    { type: "polygon", icon: <TbPolygon size={28} /> },
-    { type: "circle", icon: <TbCircleDashed size={28} /> },
-    { type: "marker", icon: <FaMapMarkerAlt size={28} /> },
-    { type: "arrow-polyline", icon: <PiFlowArrowBold size={28} /> },
-    { type: "polyline", icon: <MdOutlinePolyline size={28} /> },
-  ];
-
-  // Define helper functions for drawing shapes
-  const getShapeInstance = (type: Shapes) => { /* Implementation details */ };
-  const handleConfirmDraw = () => { /* Implementation details */ };
-  const handleUndoClick = () => { /* Implementation details */ };
-  const handleDeleteDraw = () => { /* Implementation details */ };
-  const handleStartDrawing = (sketchType: Shapes) => { /* Implementation details */ };
-  const canConfirmDrawing = () => { /* Implementation details */ };
-
-  return (
-    // SketchesToolbar JSX component
-  );
-};
-
-export default SketchesToolbar;
-```

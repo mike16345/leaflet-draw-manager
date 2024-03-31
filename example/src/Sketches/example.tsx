@@ -2,25 +2,12 @@ import { FaMapMarkerAlt, FaCheck, FaEraser, FaUndo } from "react-icons/fa";
 import { MdOutlinePolyline } from "react-icons/md";
 import { PiFlowArrowBold } from "react-icons/pi";
 import { RiSketching } from "react-icons/ri";
-import { TbPolygon, TbCircleDashed, TbFlagCancel } from "react-icons/tb";
+import { TbPolygon, TbCircleDashed } from "react-icons/tb";
 
 import { useEffect, useRef, useState } from "react";
 import { LatLng } from "leaflet";
 import { FeatureGroup, useMap } from "react-leaflet";
 import L from "leaflet";
-// import {
-//   DrawArrowPolyline,
-//   DrawCircle,
-//   DrawLineShape,
-//   DrawManagerMode,
-//   DrawMarker,
-//   DrawPolygon,
-//   DrawPolyline,
-//   LeafletShape,
-//   ShapeFactory,
-//   Shapes,
-//   getShapePositions,
-// } from "leaflet-draw-manager";
 import {
   DrawArrowPolyline,
   DrawCircle,
@@ -33,7 +20,7 @@ import {
   ShapeFactory,
   Shapes,
   getShapePositions,
-} from "../../../src/index";
+} from "leaflet-draw-manager";
 import { shapeClassConfig } from "../ShapeConfig";
 import { FcCancel } from "react-icons/fc";
 
@@ -179,6 +166,8 @@ const SketchesToolbar = () => {
   };
 
   useEffect(() => {
+    // There is a bug that when clicking on an element on the map the map still captures the click.
+    // This prevents that extra click.
     if (!divRef.current) return;
     L.DomEvent.disableClickPropagation(divRef.current);
   });
