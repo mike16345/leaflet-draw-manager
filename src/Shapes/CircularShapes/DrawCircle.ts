@@ -273,7 +273,6 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
         break;
       default:
         if (!this.isTouchDevice) {
-          console.log("here");
           positionFrom = new LatLng(
             this.cursorPosition.lat,
             this.cursorPosition.lng

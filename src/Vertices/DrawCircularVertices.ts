@@ -51,8 +51,6 @@ class DrawCircularVertices extends DrawVertices {
         iconSize: L.point(24, 24),
       });
 
-    console.log("midpoint icon", this.midpointVertexIcon);
-
     const marker = L.marker(latLng, {
       draggable: true,
       icon: vertexIcon,
@@ -111,8 +109,6 @@ class DrawCircularVertices extends DrawVertices {
         className: "hit-box vertex-marker ",
         iconSize: L.point(24, 24),
       });
-
-    console.log("outer icon", this.vertexIcon);
 
     const marker = L.marker(latLng, {
       draggable: true,
