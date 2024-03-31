@@ -8,6 +8,19 @@ import { useEffect, useRef, useState } from "react";
 import { LatLng } from "leaflet";
 import { FeatureGroup, useMap } from "react-leaflet";
 import L from "leaflet";
+// import {
+//   DrawArrowPolyline,
+//   DrawCircle,
+//   DrawLineShape,
+//   DrawManagerMode,
+//   DrawMarker,
+//   DrawPolygon,
+//   DrawPolyline,
+//   LeafletShape,
+//   ShapeFactory,
+//   Shapes,
+//   getShapePositions,
+// } from "leaflet-draw-manager";
 import {
   DrawArrowPolyline,
   DrawCircle,
@@ -20,7 +33,7 @@ import {
   ShapeFactory,
   Shapes,
   getShapePositions,
-} from "leaflet-draw-manager";
+} from "../../../src/index";
 import { shapeClassConfig } from "../ShapeConfig";
 import { FcCancel } from "react-icons/fc";
 
@@ -108,7 +121,18 @@ const SketchesToolbar = () => {
     const shapeInstance = getShapeInstance(sketchType);
     if (!shapeInstance) return;
 
-    shapeInstance.on("onFinish", (shape: LeafletShape | null) => {});
+    shapeInstance.on("onFinish", (shape: LeafletShape | null) => {
+      if (!shape) return;
+      //@ts-ignore
+      shape.type = sketchType;
+      shape.on("dblclick", (e) => {
+        if (!e.target.type) return;
+        const shapeInstance = getShapeInstance(e.target.type);
+        if (!shapeInstance) return;
+        shapeInstance.editShape(e.target);
+        setSketchType(e.target.type);
+      });
+    });
 
     shapeInstance.on("onAddPoint", (latlngs: LatLng[]) => {});
 
