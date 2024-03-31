@@ -1,6 +1,7 @@
 import "./App.css";
 import { MapContainer, TileLayer } from "react-leaflet";
-import SketchesToolbar from "./SketchesToolbar";
+import CirclesInMap from "./Circle";
+import SketchesToolbar from "./Sketches/example";
 
 function App() {
   const position = { lat: 44.5, lng: -89.5 };
@@ -21,6 +22,7 @@ function App() {
           maxNativeZoom={16}
           maxZoom={20}
         />
+        {/* <CirclesInMap /> */}
         <SketchesToolbar />
       </MapContainer>
     </>

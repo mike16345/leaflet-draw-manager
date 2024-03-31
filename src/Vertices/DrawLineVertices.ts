@@ -12,13 +12,19 @@ class DrawLineVertices extends DrawVertices {
   protected displayDistances: boolean;
 
   /**
+   * Flag whether to display the numbers on the vertices.
+   */
+  protected displayVertexNumbers: boolean;
+
+  /**
    * Creates a new instance of the DrawLineVertices class.
    * @param map The map on which to draw the line vertices.
    * @param shapeType The type of shape to draw (e.g., "polyline", "polygon").
    */
   constructor(map: L.Map, shapeType: Shapes | string = "") {
     super(map, shapeType);
-    this.displayDistances = true;
+    this.displayDistances = false;
+    this.displayVertexNumbers = false;
   }
 
   /**
@@ -27,13 +33,17 @@ class DrawLineVertices extends DrawVertices {
    * @param index The index of the vertex.
    */
   drawVertex(latLng: LatLng, index: number) {
+    const vertexIcon =
+      this.vertexIcon ||
+      L.divIcon({
+        className: "hit-box vertex-marker",
+        html: `${this.displayVertexNumbers ? index + 1 : ""}`,
+        iconSize: L.point(24, 24),
+      });
+
     const vertexMarker = L.marker(latLng, {
       draggable: true,
-      icon: L.divIcon({
-        className: "hit-box vertex-marker",
-        html: `${index + 1}`,
-        iconSize: L.point(24, 24),
-      }),
+      icon: vertexIcon,
     });
 
     vertexMarker.on("dragstart", () => {
@@ -90,13 +100,16 @@ class DrawLineVertices extends DrawVertices {
       (midpointLayer as L.Marker).setLatLng(midpoint);
       return;
     }
+    const vertexIcon =
+      this.midpointVertexIcon ||
+      L.divIcon({
+        className: "hit-box vertex-marker midpoint-marker",
+        iconSize: L.point(20, 20),
+      });
 
     const midpointMarker = L.marker(midpoint, {
       draggable: true,
-      icon: L.divIcon({
-        className: "hit-box vertex-marker midpoint-marker",
-        iconSize: L.point(20, 20),
-      }),
+      icon: vertexIcon,
     });
 
     if (this.displayDistances) {
@@ -274,6 +287,16 @@ class DrawLineVertices extends DrawVertices {
     this.drawMidpointVertices();
   }
 
+  /**
+   * Sets the option to display the numbers of the vertices and redraws them.
+   * @param display Flag to set display.
+   */
+  setDisplayVertexNumbers(display: boolean) {
+    this.displayVertexNumbers = display;
+    this.clearVertices();
+    this.drawVertices();
+  }
+
   /*
    * Clears only the midpoint vertices from the map.
    */
@@ -307,7 +330,7 @@ class DrawLineVertices extends DrawVertices {
   }
 
   /**
-   *Deletes the last added vertex and midpoint vertices.
+   * Deletes the last added vertex and midpoint vertices.
    */
   handleContextClick() {
     super.handleContextClick();

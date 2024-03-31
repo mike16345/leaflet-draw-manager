@@ -1,6 +1,6 @@
-import L, { LeafletMouseEvent, LatLng, PolylineOptions } from "leaflet";
-import { DrawManagerMode } from "../../enums/DrawManagerMode";
 import { DrawShape } from "../DrawShape";
+import L, { LeafletMouseEvent, LatLng, PolylineOptions, icon } from "leaflet";
+import { DrawManagerMode } from "../../enums/DrawManagerMode";
 import { Shapes } from "../../enums/Shapes";
 import { IDrawManagerEvents, IDrawShape } from "../../interfaces/IDrawShape";
 import { DrawLineVertices } from "../../Vertices/DrawLineVertices";
@@ -51,27 +51,27 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.fireEvent("onDrawStart");
   }
 
-  setVerticesEvents() {
+  protected setVerticesEvents() {
+    this.vertices.on("onDragVertexStart", this.events.onDragVertexStart);
     this.vertices.on("onDragVertex", this.handleDragVertex.bind(this));
     this.vertices.on(
       "onDragMidpointVertex",
       this.handleDragMidpointVertex.bind(this)
     );
+    this.vertices.on("onDragEndVertex", this.events.onDragEndVertex);
   }
 
   cancelEdit() {
-    this.latLngs = [...this.preEditLatLngs];
+    this.latLngs = structuredClone(this.preEditLatLngs);
     this.redrawShape();
-    if (this.onCancelEditHandler) {
-      this.onCancelEditHandler(this.currentShape);
-    }
-    this.onFinishHandler = null;
+    this.fireEvent("onCancelEdit", [this.currentShape]);
+    this.off("onFinish");
     this.stopDrawing();
   }
 
   override stopDrawing() {
     if (this.drawMode === DrawManagerMode.EDIT && this.currentShape) {
-      this.currentShape.setStyle({
+      this.setShapeOptions({
         ...this.currentShape.options,
         fillOpacity: 0.2,
         dashArray: undefined,
@@ -93,9 +93,9 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.currentShape = shape;
     this.featureGroup.addLayer(this.currentShape);
     this.latLngs = getShapePositions(shape);
-    this.preEditLatLngs = [...this.latLngs];
+    this.preEditLatLngs = structuredClone(this.latLngs);
 
-    this.currentShape.setStyle({
+    this.setShapeOptions({
       ...this.currentShape.options,
       dashArray: "12,12",
       fillOpacity: 0.3,
@@ -103,7 +103,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
 
     this.redrawShape();
     this.vertices.clearAllVertices();
-    this.vertices.setLatLngs = [...this.latLngs];
+    this.vertices.setLatLngs = structuredClone(this.latLngs);
     this.setVerticesEvents();
     this.vertices.drawVertices();
     this.vertices.drawMidpointVertices();
@@ -119,22 +119,29 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     if (!this.featureGroup.hasLayer(this.currentShape)) {
       this.featureGroup.addLayer(this.currentShape);
     }
-
+    if (this.drawMode === DrawManagerMode.EDIT) {
+      this.fireEvent("onEdit", [this.latLngs]);
+    }
     this.currentShape.setLatLngs(this.latLngs);
 
     return this.currentShape;
   }
 
-  handleDragVertex(e: any, index?: number): void {
+  protected handleDragVertex(e: any, index?: number): void {
     if (index || index == 0) this.latLngs[index] = e.latlng;
     this.redrawShape();
+    this.fireEvent("onDragVertex", [this.latLngs]);
   }
 
-  handleDragMidpointVertex(e: any, index: number, insert = true): void {
+  protected handleDragMidpointVertex(
+    e: any,
+    index: number,
+    insert = true
+  ): void {
     if (insert) this.latLngs.splice(index + 1, 0, e.latlng);
     else this.latLngs[index + 1] = e.latlng;
-
     this.redrawShape();
+    this.fireEvent("onDragMidpointVertex", [this.latLngs]);
   }
 
   /**
@@ -149,7 +156,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
   setLatLngs(latLngs: LatLng[]): void {
     this.latLngs = latLngs;
     this.vertices.clearAllVertices();
-    this.vertices.setLatLngs = [...latLngs];
+    this.vertices.setLatLngs = structuredClone(latLngs);
     this.vertices.drawVertices();
     this.vertices.drawMidpointVertices();
     this.redrawShape();
@@ -168,12 +175,11 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.vertices.on(event, callback);
   }
 
-  override setShapeOptions(options: L.PolylineOptions): void {
-    super.setShapeOptions(options);
-    this.currentShape?.setStyle(options);
+  setShapeOptions(options: L.PolylineOptions): void {
+    this.currentShape.setStyle(options);
   }
 
-  initDrawEvents(): void {
+  protected initDrawEvents(): void {
     this.map.on("click", this.handleMapClick.bind(this));
     this.map.on("contextmenu", this.handleContextClick.bind(this));
     if (!this.isTouchDevice)
@@ -205,7 +211,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.drawDashedPolyline();
   }
 
-  removeDashedPolyline() {
+  protected removeDashedPolyline() {
     if (!this.dashedPolyline.element) return;
     this.featureGroup.removeLayer(this.dashedPolyline.element);
     this.dashedPolyline.element = null;
@@ -215,7 +221,10 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     if (!this.latLngs.length) return;
 
     this.removeDashedPolyline();
-    this.dashedPolyline.coordinates = [this.latLngs.at(-1), this.cursorPosition];
+    this.dashedPolyline.coordinates = [
+      this.latLngs.at(-1),
+      this.cursorPosition,
+    ];
     this.dashedPolyline.element = L.polyline(this.dashedPolyline.coordinates, {
       ...this.shapeOptions,
       className: "cursor-crosshair",
@@ -238,6 +247,26 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
       ...this.currentShape.options,
       [attribute]: value,
     });
+  }
+
+  /**
+   * Sets the option to display the numbers of the vertices and redraws them.
+   * @param display Flag to set display.
+   */
+  setDisplayVertexNumbers(display: boolean) {
+    this.vertices.setDisplayVertexNumbers(display);
+  }
+
+  override setVertexIcon(vertexIcon: L.Icon<L.IconOptions> | L.DivIcon): void {
+    super.setVertexIcon(vertexIcon);
+    this.vertices.setVertexIcon(vertexIcon);
+  }
+
+  override setMidpointVertexIcon(
+    midpointIcon: L.Icon<L.IconOptions> | L.DivIcon
+  ): void {
+    super.setMidpointVertexIcon(midpointIcon);
+    this.vertices.setMidpointVertexIcon(midpointIcon);
   }
 }
 

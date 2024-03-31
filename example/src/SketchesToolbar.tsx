@@ -3,20 +3,8 @@ import { CircleOptions, LatLng } from "leaflet";
 import { FeatureGroup, useMap } from "react-leaflet";
 import L from "leaflet";
 import { renderToString } from "react-dom/server";
+
 // for local testing purposes
-// import {
-//   DrawArrowPolyline,
-//   DrawCircle,
-//   DrawLineShape,
-//   DrawManagerMode,
-//   DrawMarker,
-//   DrawPolygon,
-//   DrawPolyline,
-//   LeafletShape,
-//   ShapeFactory,
-//   Shapes,
-//   getShapePositions,
-// } from "../../src/index";
 import {
   DrawArrowPolyline,
   DrawCircle,
@@ -29,7 +17,20 @@ import {
   ShapeFactory,
   Shapes,
   getShapePositions,
-} from "leaflet-draw-manager";
+} from "../../src/index";
+// import {
+//   DrawArrowPolyline,
+//   DrawCircle,
+//   DrawLineShape,
+//   DrawManagerMode,
+//   DrawMarker,
+//   DrawPolygon,
+//   DrawPolyline,
+//   LeafletShape,
+//   ShapeFactory,
+//   Shapes,
+//   getShapePositions,
+// } from "leaflet-draw-manager";
 import { FaMapMarkerAlt, FaCheck, FaEraser, FaUndo } from "react-icons/fa";
 import { MdOutlinePolyline } from "react-icons/md";
 import { PiFlowArrowBold } from "react-icons/pi";
@@ -37,13 +38,14 @@ import { RiSketching } from "react-icons/ri";
 import { TbPolygon, TbCircleDashed } from "react-icons/tb";
 import ControlBtn from "./ControlsBtn";
 import { Else, If, Then, When } from "react-if";
+import { shapeClassConfig } from "./ShapeConfig";
 
 const SketchesToolbar = () => {
   const map = useMap();
 
   const featureGroup = useRef<L.FeatureGroup | null>(null);
   const divRef = useRef<HTMLDivElement | null>(null);
-  const shapeFactory = ShapeFactory.getInstance();
+  const shapeFactory = ShapeFactory.getInstance(shapeClassConfig);
   const [sketchType, setSketchType] = useState<Shapes | null>(null);
   const [openToolbar, setOpenToolBar] = useState(false);
 
@@ -69,9 +71,17 @@ const SketchesToolbar = () => {
 
     switch (type) {
       case Shapes.POLYGON:
-        return shapeFactory.getPolygonInstance(map, featureGroup.current, options);
+        return shapeFactory.getPolygonInstance(
+          map,
+          featureGroup.current,
+          options
+        );
       case Shapes.POLYLINE:
-        return shapeFactory.getPolylineInstance(map, featureGroup.current, options);
+        return shapeFactory.getPolylineInstance(
+          map,
+          featureGroup.current,
+          options
+        );
       case Shapes.CIRCLE:
         return shapeFactory.getCircleInstance(
           map,
@@ -132,18 +142,14 @@ const SketchesToolbar = () => {
         if (!e.target.type) return;
         const shapeInstance = getShapeInstance(e.target.type);
         if (!shapeInstance) return;
-        shapeInstance.editShape(shape);
+        shapeInstance.editShape(e.target);
         setSketchType(e.target.type);
       });
     });
 
-    shapeInstance.on("onAddPoint", (latlngs: LatLng) => {
-      console.log("add point", latlngs);
-    });
+    shapeInstance.on("onAddPoint", (latlngs: LatLng) => {});
 
-    shapeInstance.on("onDeletePoint", (latlngs: LatLng) => {
-      console.log("delete point", latlngs);
-    });
+    shapeInstance.on("onDeletePoint", (latlngs: LatLng) => {});
 
     shapeInstance.on("onDragVertex", (latlngs: LatLng) => {
       console.log("drag vertex", latlngs);
@@ -218,8 +224,8 @@ const SketchesToolbar = () => {
         <div className="flex flex-col space-y-2 ">
           <If
             condition={
-              ShapeFactory.shapeInstance?.getDrawMode() == DrawManagerMode.EDIT ||
-              sketchType
+              ShapeFactory.shapeInstance?.getDrawMode() ==
+                DrawManagerMode.EDIT || sketchType
             }
           >
             <Then>

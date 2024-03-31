@@ -44,12 +44,16 @@ class DrawCircularVertices extends DrawVertices {
    * @param latLng The LatLng coordinates of the center vertex.
    */
   drawCenterVertex(latLng: LatLng) {
-    const marker = L.marker(latLng, {
-      draggable: true,
-      icon: L.divIcon({
+    const vertexIcon =
+      this.midpointVertexIcon ||
+      L.divIcon({
         className: "hit-box vertex-marker ",
         iconSize: L.point(24, 24),
-      }),
+      });
+
+    const marker = L.marker(latLng, {
+      draggable: true,
+      icon: vertexIcon,
     });
 
     marker.on("dragstart", () => {
@@ -99,12 +103,16 @@ class DrawCircularVertices extends DrawVertices {
       return;
     }
 
-    const marker = L.marker(latLng, {
-      draggable: true,
-      icon: L.divIcon({
+    const vertexIcon =
+      this.vertexIcon ||
+      L.divIcon({
         className: "hit-box vertex-marker ",
         iconSize: L.point(24, 24),
-      }),
+      });
+
+    const marker = L.marker(latLng, {
+      draggable: true,
+      icon: vertexIcon,
     });
 
     marker.on("dragstart", () => this.fireEvent("onDragVertexStart"));
@@ -139,6 +147,7 @@ class DrawCircularVertices extends DrawVertices {
       this.drawCenterVertex(this.latLngs[0]);
     } else if (this.latLngs.length == 2) {
       this.drawOuterVertex(this.latLngs[1]);
+      this.map.off("click", this.handleMapClick.bind(this));
     }
   }
 

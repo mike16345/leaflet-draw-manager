@@ -8,17 +8,13 @@ interface IDrawShape<T> {
   cancelEdit: () => void;
   redrawShape: () => void;
   deleteShape: () => void;
-  initDrawEvents: () => void;
-  disableDrawEvents: () => void;
 }
 
 interface IDrawVertices {
   clearVertices: () => void;
   clearMidpointVertices: () => void;
   clearAllVertices: () => void;
-  handleOnDragEnd: ((latLngs: LatLng[]) => void) | null;
   handleContextClick: (() => void) | null;
-  setHandleDragVertex: (handler: (e: LeafletEvent, index?: number) => void) => void;
 }
 
 interface IDrawManagerEvents {

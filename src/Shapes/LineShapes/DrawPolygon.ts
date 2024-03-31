@@ -1,9 +1,8 @@
+import { DrawLineShape } from "./DrawLineShape";
 import { DrawManagerMode } from "../../enums/DrawManagerMode";
 import { Shapes } from "../../enums/Shapes";
 import { IDrawManagerEvents } from "../../interfaces/IDrawShape";
-import { DrawShape } from "../DrawShape";
-import { DrawLineShape } from "./DrawLineShape";
-import L from "leaflet";
+import L, { DivIcon, Icon } from "leaflet";
 
 /**
  * A class for drawing polygons on a map.
@@ -13,6 +12,7 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
   private dragMarker: L.Marker | null;
   private isDraggingCenterMarker: boolean;
   private onDragEndHandler: Function | null;
+  private dragIcon: Icon | DivIcon | null;
 
   /**
    * Creates a new instance of DrawPolygon.
@@ -41,7 +41,7 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
     featureGroup: L.FeatureGroup,
     shapeOptions: L.PolylineOptions
   ): DrawPolygon {
-    DrawShape.validateInstanceCall();
+    DrawLineShape.validateInstanceCall();
     if (!DrawPolygon.instance) {
       DrawPolygon.instance = new DrawPolygon(map, featureGroup, shapeOptions);
     }
@@ -78,28 +78,35 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
 
     return polygon;
   }
-  
+
   override on(event: keyof IDrawManagerEvents, callback: Function): void {
     super.on(event, callback);
     if (event === "onDragEndVertex") this.onDragEndHandler = callback;
   }
 
   private addDragMarker() {
-    if (!this.currentShape || this.latLngs.length < 3 || this.dragMarker) return;
+    if (
+      !this.currentShape ||
+      !this.isDraggable ||
+      this.latLngs.length < 3 ||
+      this.dragMarker
+    )
+      return;
     // Get the bounds of the polygon
     var polygonBounds = this.currentShape.getBounds();
 
     // Get the center of the polygon
     var polygonCenter = polygonBounds.getCenter();
     if (!polygonCenter) return;
-
     const MarkerOptions = {
       draggable: true,
-      icon: L.divIcon({
-        className: "vertex-marker",
-        html: ` `,
-        iconSize: L.point(30, 30),
-      }),
+      icon:
+        this.dragIcon ||
+        L.divIcon({
+          className: "vertex-marker",
+          html: ``,
+          iconSize: L.point(30, 30),
+        }),
     };
 
     var marker = L.marker(polygonCenter, MarkerOptions).addTo(this.featureGroup);
@@ -113,7 +120,7 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
     // When the marker is dragged, update the polygon's position
     marker.on("drag", (event) => {
       var markerLatLng = event.target.getLatLng();
-      var latlngs = [...this.latLngs];
+      var latlngs = structuredClone(this.latLngs);
 
       // Calculate the offset between the marker's new position and the original polygon center
       var offsetLat = markerLatLng.lat - polygonCenter.lat;
@@ -137,10 +144,11 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
 
     marker.on("dragend", (event) => {
       this.isDraggingCenterMarker = false;
-      this.vertices.setLatLngs = [...this.latLngs];
+      this.vertices.setLatLngs = structuredClone(this.latLngs);
       this.vertices.drawVertices();
       this.vertices.drawMidpointVertices();
       this.fireEvent("onEdit", [this.latLngs]);
+
       if (this.drawMode !== DrawManagerMode.DRAW) return;
       this.cursorPosition = event.target._latlng;
       this.drawDashedPolyline();
@@ -152,6 +160,10 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
     });
 
     this.dragMarker = marker;
+  }
+
+  setDragIcon(icon: Icon | DivIcon) {
+    this.dragIcon = icon;
   }
 
   /**

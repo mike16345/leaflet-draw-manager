@@ -33,11 +33,6 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
   protected markerGroup: FeatureGroup;
 
   /**
-   * A flag indicating whether the device is a touch screen.
-   */
-  protected isTouchScreen: boolean;
-
-  /**
    * The vertices of the drawn circle.
    */
   protected vertices: DrawCircularVertices;
@@ -60,7 +55,6 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     this.markerGroup = L.featureGroup();
     this.markerGroup.addTo(this.map);
     this.cursorPosition = new LatLng(0.0, 0.0);
-    this.isTouchScreen = true;
     this.vertices = new DrawCircularVertices(this.map, Shapes.CIRCLE);
   }
 
@@ -156,15 +150,14 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     return this.currentShape;
   }
 
-  /**
-   * Sets the event handlers for the vertices of the drawn circle.
-   */
-  setVerticesEvents() {
+  protected setVerticesEvents() {
+    this.vertices.on("onDragVertexStart", this.events.onDragVertexStart);
     this.vertices.on("onDragVertex", this.handleDragVertex.bind(this));
     this.vertices.on(
       "onDragMidpointVertex",
       this.handleDragMidpointVertex.bind(this)
     );
+    this.vertices.on("onDragEndVertex", this.events.onDragEndVertex);
   }
 
   /**
@@ -174,6 +167,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
   protected handleDragVertex(e: any): void {
     this.latLngs[1] = e.latlng;
     this.redrawShape();
+    this.fireEvent("onDragVertex", [this.latLngs]);
   }
 
   /**
@@ -183,6 +177,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
   protected handleDragMidpointVertex(e: any): void {
     this.latLngs[0] = e.latlng;
     this.currentShape?.setLatLng(e.latlng);
+    this.fireEvent("onDragMidpointVertex", [this.latLngs]);
   }
 
   /**
@@ -207,37 +202,50 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    * @returns The drawn circle.
    */
   drawShape(latLngs: L.LatLng[] | null = null) {
-    const firstPoint = (latLngs && latLngs[0]) || this.latLngs[0];
-    const secondPoint = (latLngs && latLngs[1]) || this.latLngs[1];
-    const distance = firstPoint.distanceTo(secondPoint);
-
+    var distance = 0;
     const circle = L.circle(
       (latLngs && latLngs[0]) || this.latLngs[0],
       this.shapeOptions
     );
+    const firstPoint = (latLngs && latLngs[0]) || this.latLngs[0];
+    const secondPoint = (latLngs && latLngs[1]) || this.latLngs[1];
+    if (firstPoint && secondPoint) {
+      distance = firstPoint.distanceTo(secondPoint);
+    }
+
     circle.setRadius(distance);
     circle.addTo(this.featureGroup);
 
     return circle;
   }
 
+  private canDraw() {
+    return (
+      !this.currentShape &&
+      ((this.latLngs.length == 1 && !this.isTouchDevice) ||
+        (this.latLngs.length == 2 && this.isTouchDevice))
+    );
+  }
+
   /**
    * Redraws the drawn circle on the map.
    */
   redrawShape() {
-    if (this.latLngs.length == 2 && !this.currentShape) {
+    if (this.canDraw()) {
       this.currentShape = this.drawShape();
     }
 
-    if (!this.currentShape) return;
+    if (!this.currentShape && this.isTouchDevice) return;
     if (!this.featureGroup.hasLayer(this.currentShape)) {
       this.featureGroup.addLayer(this.currentShape);
     }
-
     const radius = this.calculateRadius();
     if (radius) this.currentShape.setRadius(radius);
 
     this.currentShape.setLatLng(this.latLngs[0]);
+    if (this.drawMode === DrawManagerMode.EDIT) {
+      this.fireEvent("onEdit", [this.latLngs]);
+    }
   }
 
   /**
@@ -251,7 +259,9 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
 
     switch (this.drawMode) {
       case DrawManagerMode.STOP:
-        radius = this.latLngs[this.latLngs.length - 1].distanceTo(this.latLngs[0]);
+        radius = this.latLngs[this.latLngs.length - 1].distanceTo(
+          this.latLngs[0]
+        );
         break;
       case DrawManagerMode.EDIT:
         if (this.latLngs[1]) {
@@ -262,12 +272,14 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
         }
         break;
       default:
-        if (!this.isTouchScreen)
+        if (!this.isTouchDevice) {
           positionFrom = new LatLng(
             this.cursorPosition.lat,
             this.cursorPosition.lng
           );
-        else positionFrom = this.latLngs[1];
+        } else {
+          positionFrom = this.latLngs[1];
+        }
 
         radius = positionFrom.distanceTo(this.latLngs[0]);
         break;
@@ -277,10 +289,9 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
   }
 
   /**
-   * Calculates the coordinates of two points on the circumference of a circle given the center point and the radius.
+   * Calculates the coordinates of two points on the circumference of a given circle.
    *
-   * @param circleCenter - The center point of the circle.
-   * @param radius - The radius of the circle.
+   * @param circle - The circle to get radius point.
    * @returns The coordinates of two points on the circumference of the circle.
    */
   static getRadiusLatLng(circle: Circle) {
@@ -292,7 +303,8 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     var radiusVertex = new LatLng(
       circleCenter.lat,
       circleCenter.lng +
-        radius / (LATITUDE_FACTOR * Math.cos(circleCenter.lat * (Math.PI / 180))) // Longitude calculation
+        radius /
+          (LATITUDE_FACTOR * Math.cos(circleCenter.lat * (Math.PI / 180))) // Longitude calculation
     );
 
     return radiusVertex;
@@ -303,7 +315,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    */
   initDrawEvents(): void {
     this.map.on("click", this.handleMapClick.bind(this));
-    if (!this.isTouchScreen)
+    if (!this.isTouchDevice)
       this.map.on("mousemove", this.handleMapMouseMove.bind(this));
   }
 
@@ -313,6 +325,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    */
   protected handleMapMouseMove(e: LeafletMouseEvent): void {
     this.cursorPosition = e.latlng;
+
     if (this.latLngs.length == 1) {
       this.redrawShape();
     }
@@ -324,11 +337,25 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    */
   protected handleMapClick(e: LeafletMouseEvent): void {
     this.latLngs.push(e.latlng);
+    this.fireEvent("onAddPoint", [this.latLngs]);
+    if (this.latLngs.length <= 2) this.redrawShape();
 
-    if (this.onClickHandler) {
-      this.onClickHandler(this.latLngs);
+    if (this.latLngs.length == 2) {
+      this.map.off("click", this.handleMapClick.bind(this));
+      this.map.off("mousemove", this.handleMapMouseMove.bind(this));
     }
-    this.redrawShape();
+  }
+
+  override setVertexIcon(vertexIcon: L.Icon<L.IconOptions> | L.DivIcon): void {
+    super.setVertexIcon(vertexIcon);
+    this.vertices.setVertexIcon(vertexIcon);
+  }
+
+  override setMidpointVertexIcon(
+    midpointIcon: L.Icon<L.IconOptions> | L.DivIcon
+  ): void {
+    super.setMidpointVertexIcon(midpointIcon);
+    this.vertices.setMidpointVertexIcon(midpointIcon);
   }
 }
 
