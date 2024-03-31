@@ -2,7 +2,6 @@ import L, { LatLng } from "leaflet";
 import { DrawManagerMode } from "../enums/DrawManagerMode";
 import { Shapes } from "../enums/Shapes";
 import { LeafletShape } from "../types/LeafletShape";
-import { ShapeOptions } from "../types/ShapeOptions";
 import { ShapeFactory } from "../ShapeFactory/ShapeFactory";
 import { IDrawManagerEvents } from "../interfaces/IDrawShape";
 

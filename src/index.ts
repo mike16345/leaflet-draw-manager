@@ -6,6 +6,9 @@ export type { ShapeClass } from "./types/ShapeClass";
 export type { ShapeOptions } from "./types/ShapeOptions";
 export type { LeafletShape } from "./types/LeafletShape";
 
+// Interfaces
+export { IShapeClassConfig } from "./interfaces/IShapeClassConfig";
+
 // Enums
 export * from "./enums";
 

@@ -71,9 +71,17 @@ const SketchesToolbar = () => {
 
     switch (type) {
       case Shapes.POLYGON:
-        return shapeFactory.getPolygonInstance(map, featureGroup.current, options);
+        return shapeFactory.getPolygonInstance(
+          map,
+          featureGroup.current,
+          options
+        );
       case Shapes.POLYLINE:
-        return shapeFactory.getPolylineInstance(map, featureGroup.current, options);
+        return shapeFactory.getPolylineInstance(
+          map,
+          featureGroup.current,
+          options
+        );
       case Shapes.CIRCLE:
         return shapeFactory.getCircleInstance(
           map,
@@ -216,8 +224,8 @@ const SketchesToolbar = () => {
         <div className="flex flex-col space-y-2 ">
           <If
             condition={
-              ShapeFactory.shapeInstance?.getDrawMode() == DrawManagerMode.EDIT ||
-              sketchType
+              ShapeFactory.shapeInstance?.getDrawMode() ==
+                DrawManagerMode.EDIT || sketchType
             }
           >
             <Then>

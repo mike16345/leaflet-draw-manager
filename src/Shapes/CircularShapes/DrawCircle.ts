@@ -289,10 +289,9 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
   }
 
   /**
-   * Calculates the coordinates of two points on the circumference of a circle given the center point and the radius.
+   * Calculates the coordinates of two points on the circumference of a given circle.
    *
-   * @param circleCenter - The center point of the circle.
-   * @param radius - The radius of the circle.
+   * @param circle - The circle to get radius point.
    * @returns The coordinates of two points on the circumference of the circle.
    */
   static getRadiusLatLng(circle: Circle) {
