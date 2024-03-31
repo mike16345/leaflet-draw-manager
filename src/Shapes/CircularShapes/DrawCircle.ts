@@ -150,15 +150,14 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     return this.currentShape;
   }
 
-  /**
-   * Sets the event handlers for the vertices of the drawn circle.
-   */
-  setVerticesEvents() {
+  protected setVerticesEvents() {
+    this.vertices.on("onDragVertexStart", this.events.onDragVertexStart);
     this.vertices.on("onDragVertex", this.handleDragVertex.bind(this));
     this.vertices.on(
       "onDragMidpointVertex",
       this.handleDragMidpointVertex.bind(this)
     );
+    this.vertices.on("onDragEndVertex", this.events.onDragEndVertex);
   }
 
   /**
@@ -168,6 +167,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
   protected handleDragVertex(e: any): void {
     this.latLngs[1] = e.latlng;
     this.redrawShape();
+    this.fireEvent("onDragVertex", [this.latLngs]);
   }
 
   /**
@@ -177,6 +177,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
   protected handleDragMidpointVertex(e: any): void {
     this.latLngs[0] = e.latlng;
     this.currentShape?.setLatLng(e.latlng);
+    this.fireEvent("onDragMidpointVertex", [this.latLngs]);
   }
 
   /**
@@ -218,17 +219,20 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     return circle;
   }
 
+  private canDraw() {
+    return (
+      !this.currentShape &&
+      ((this.latLngs.length == 1 && !this.isTouchDevice) ||
+        (this.latLngs.length == 2 && this.isTouchDevice))
+    );
+  }
+
   /**
    * Redraws the drawn circle on the map.
    */
   redrawShape() {
-    if (!this.currentShape) {
-      if (
-        (this.latLngs.length == 1 && !this.isTouchDevice) ||
-        (this.latLngs.length == 2 && this.isTouchDevice)
-      ) {
-        this.currentShape = this.drawShape();
-      }
+    if (this.canDraw()) {
+      this.currentShape = this.drawShape();
     }
 
     if (!this.currentShape && this.isTouchDevice) return;
@@ -255,7 +259,9 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
 
     switch (this.drawMode) {
       case DrawManagerMode.STOP:
-        radius = this.latLngs[this.latLngs.length - 1].distanceTo(this.latLngs[0]);
+        radius = this.latLngs[this.latLngs.length - 1].distanceTo(
+          this.latLngs[0]
+        );
         break;
       case DrawManagerMode.EDIT:
         if (this.latLngs[1]) {
@@ -299,7 +305,8 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     var radiusVertex = new LatLng(
       circleCenter.lat,
       circleCenter.lng +
-        radius / (LATITUDE_FACTOR * Math.cos(circleCenter.lat * (Math.PI / 180))) // Longitude calculation
+        radius /
+          (LATITUDE_FACTOR * Math.cos(circleCenter.lat * (Math.PI / 180))) // Longitude calculation
     );
 
     return radiusVertex;

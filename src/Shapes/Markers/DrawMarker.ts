@@ -178,7 +178,7 @@ class DrawMarker extends DrawShape<L.Marker> {
    * Sets the options for the marker and redraws the marker with the new options.
    * @param options The options to set.
    */
-  override setShapeOptions(options: L.MarkerOptions): void {
+  setShapeOptions(options: L.MarkerOptions): void {
     if (!this.currentShape) return;
     this.shapeOptions = options;
     this.featureGroup.removeLayer(this.currentShape);

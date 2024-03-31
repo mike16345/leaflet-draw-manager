@@ -8,8 +8,6 @@ interface IDrawShape<T> {
   cancelEdit: () => void;
   redrawShape: () => void;
   deleteShape: () => void;
-  initDrawEvents: () => void;
-  disableDrawEvents: () => void;
 }
 
 interface IDrawVertices {

@@ -51,12 +51,14 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.fireEvent("onDrawStart");
   }
 
-  setVerticesEvents() {
+  protected setVerticesEvents() {
+    this.vertices.on("onDragVertexStart", this.events.onDragVertexStart);
     this.vertices.on("onDragVertex", this.handleDragVertex.bind(this));
     this.vertices.on(
       "onDragMidpointVertex",
       this.handleDragMidpointVertex.bind(this)
     );
+    this.vertices.on("onDragEndVertex", this.events.onDragEndVertex);
   }
 
   cancelEdit() {
@@ -125,16 +127,21 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     return this.currentShape;
   }
 
-  handleDragVertex(e: any, index?: number): void {
+  protected handleDragVertex(e: any, index?: number): void {
     if (index || index == 0) this.latLngs[index] = e.latlng;
     this.redrawShape();
+    this.fireEvent("onDragVertex", [this.latLngs]);
   }
 
-  handleDragMidpointVertex(e: any, index: number, insert = true): void {
+  protected handleDragMidpointVertex(
+    e: any,
+    index: number,
+    insert = true
+  ): void {
     if (insert) this.latLngs.splice(index + 1, 0, e.latlng);
     else this.latLngs[index + 1] = e.latlng;
-
     this.redrawShape();
+    this.fireEvent("onDragMidpointVertex", [this.latLngs]);
   }
 
   /**
@@ -168,11 +175,11 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.vertices.on(event, callback);
   }
 
-  override setShapeOptions(options: L.PolylineOptions): void {
+  setShapeOptions(options: L.PolylineOptions): void {
     this.currentShape.setStyle(options);
   }
 
-  initDrawEvents(): void {
+  protected initDrawEvents(): void {
     this.map.on("click", this.handleMapClick.bind(this));
     this.map.on("contextmenu", this.handleContextClick.bind(this));
     if (!this.isTouchDevice)
@@ -204,7 +211,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.drawDashedPolyline();
   }
 
-  removeDashedPolyline() {
+  protected removeDashedPolyline() {
     if (!this.dashedPolyline.element) return;
     this.featureGroup.removeLayer(this.dashedPolyline.element);
     this.dashedPolyline.element = null;
@@ -214,7 +221,10 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     if (!this.latLngs.length) return;
 
     this.removeDashedPolyline();
-    this.dashedPolyline.coordinates = [this.latLngs.at(-1), this.cursorPosition];
+    this.dashedPolyline.coordinates = [
+      this.latLngs.at(-1),
+      this.cursorPosition,
+    ];
     this.dashedPolyline.element = L.polyline(this.dashedPolyline.coordinates, {
       ...this.shapeOptions,
       className: "cursor-crosshair",

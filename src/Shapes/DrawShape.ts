@@ -215,11 +215,6 @@ class DrawShape<T extends LeafletShape> {
     return this.shapeType;
   }
 
-  setShapeOptions(shapeOptions: ShapeOptions) {
-    if (!this.currentShape) return;
-    this.currentShape.options = shapeOptions;
-  }
-
   setIsDraggable(isDraggable: boolean) {
     this.isDraggable = isDraggable;
   }
