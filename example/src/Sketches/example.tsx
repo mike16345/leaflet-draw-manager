@@ -207,8 +207,7 @@ const SketchesToolbar = () => {
 
       {(openToolbar || sketchType !== null) && (
         <div className="flex flex-col space-y-2">
-          {(ShapeFactory.shapeInstance?.getDrawMode() ===
-            DrawManagerMode.EDIT ||
+          {(ShapeFactory.shapeInstance?.getDrawMode() === DrawManagerMode.EDIT ||
             sketchType) && (
             <>
               <button
@@ -223,8 +222,7 @@ const SketchesToolbar = () => {
               >
                 <FaEraser className="text-red-400" size={28} />
               </button>
-              {ShapeFactory.shapeInstance?.getDrawMode() ==
-                DrawManagerMode.EDIT && (
+              {ShapeFactory.shapeInstance?.getDrawMode() == DrawManagerMode.EDIT && (
                 <button
                   className="rounded-xl font-bold border bg-black/70 p-2 text-white"
                   onClick={handleCancelEdit}
@@ -244,8 +242,8 @@ const SketchesToolbar = () => {
             </>
           )}
           {!(
-            ShapeFactory.shapeInstance?.getDrawMode() ===
-              DrawManagerMode.EDIT || sketchType
+            ShapeFactory.shapeInstance?.getDrawMode() === DrawManagerMode.EDIT ||
+            sketchType
           ) &&
             drawTypes.map((drawType, index) => (
               <button

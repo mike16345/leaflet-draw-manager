@@ -1,4 +1,4 @@
-import { LatLng, LeafletEvent } from "leaflet";
+import { LatLng } from "leaflet";
 
 interface IDrawShape<T> {
   startDrawing: () => void;

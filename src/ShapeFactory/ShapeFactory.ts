@@ -21,7 +21,7 @@ const DEFAULT_CONFIG: IShapeClassConfig = {
   displayLineDistances: false,
   displayVertexNumbers: false,
   isTouchDevice: false,
-  isDraggable: false,
+  isDraggable: true,
   vertexIcon: null,
   midpointIcon: null,
   polygonDragIcon: null,
@@ -35,16 +35,7 @@ class ShapeClassConfig {
   /**
    * The configuration for each shape class.
    */
-  private classConfig: IShapeClassConfig = {
-    displayLineDistances: false,
-    displayVertexNumbers: false,
-    isTouchDevice: false,
-    isDraggable: false,
-    vertexIcon: null,
-    midpointIcon: null,
-    polygonDragIcon: null,
-    events: null,
-  };
+  private classConfig: IShapeClassConfig;
 
   public constructor(config?: IShapeClassConfig) {
     this.classConfig = config || DEFAULT_CONFIG;
