@@ -12,7 +12,10 @@ _(Work in Progress)_
 ### Table of Contents
 
 - [tl;dr](#tldr)
+- [Basic Usage](#basic-usage)
+- [Classes](#classes)
 - [Custom Event Handlers](#custom-event-handlers)
+- [Helper Utilities](#helper-utilities)
 
 ## tl;dr
 
@@ -284,5 +287,3 @@ Here are a list of some functions/enums/interfaces that can be helpful while dev
 | `onEditStart`               | Fired when editShape(shapeToEdit) method is called. No parameters are provided.                                                                  | `shapeInstance.on("onEditStart", () => { /* Your code here */ });`                              |
 | `onEdit`                    | Fired when the coordinates of the shape are changed . The updated coordinates are provided.                                                      | `shapeInstance.on("onEdit", (latLngs:LatLng[]) => { /_ Your code here _/ });`                   |
 | `onCancelEdit`              | Fired when the cancelEdit() method is called. The shape object after the canceled edit is provided as a parameter.                               | `shapeInstance.on("onCancelEdit", (shape: LeafletShape \| null) => { /* Your code here */ });`  |
-
-## Usage/Examples
