@@ -100,10 +100,13 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
    * Stops drawing the circle and disables the events for drawing.
    */
   override stopDrawing() {
-    if (this.drawMode === DrawManagerMode.EDIT && this.currentShape) {
+    if (
+      this.drawMode === DrawManagerMode.EDIT &&
+      this.currentShape &&
+      !this.isCustomDashedArray
+    ) {
       this.currentShape.setStyle({
         ...this.currentShape.options,
-        fillOpacity: 0.2,
         dashArray: undefined,
       });
     }
@@ -138,6 +141,14 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     this.vertices.setLatLngs = [...this.latLngs];
 
     this.setVerticesEvents();
+    if (circle.options.dashArray) {
+      this.isCustomDashedArray = true;
+    } else {
+      this.currentShape.setStyle({
+        ...this.currentShape.options,
+        dashArray: "12,12",
+      });
+    }
     this.currentShape.setStyle({
       ...this.currentShape.options,
       dashArray: "12,12",
@@ -259,9 +270,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
 
     switch (this.drawMode) {
       case DrawManagerMode.STOP:
-        radius = this.latLngs[this.latLngs.length - 1].distanceTo(
-          this.latLngs[0]
-        );
+        radius = this.latLngs[this.latLngs.length - 1].distanceTo(this.latLngs[0]);
         break;
       case DrawManagerMode.EDIT:
         if (this.latLngs[1]) {
@@ -303,8 +312,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     var radiusVertex = new LatLng(
       circleCenter.lat,
       circleCenter.lng +
-        radius /
-          (LATITUDE_FACTOR * Math.cos(circleCenter.lat * (Math.PI / 180))) // Longitude calculation
+        radius / (LATITUDE_FACTOR * Math.cos(circleCenter.lat * (Math.PI / 180))) // Longitude calculation
     );
 
     return radiusVertex;

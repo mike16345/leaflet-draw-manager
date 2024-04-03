@@ -5,15 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.1.1] - released
+## [2.1.2] - released
 
 ### Added
 
--
+- Option to disable delete dashed polyline on finish edit. 
 
-### Added Back
+### Changed
 
--
+- Fill opacity is not changed when starting edit.
+
+### Fixed
+
+- Fixed switch edit for markers.
+
+## [2.1.1] - released
 
 ### Changed
 
@@ -32,10 +38,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added option to set polygon drag icon.
 - Added option to set vertex icon.
 - Added option to set midpoint vertex icon.
-
-### Added Back
-
--
 
 ### Changed
 
@@ -56,10 +58,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added ability to change attributes for Polygons/Polylines.
 - Added more custom events. View documentation for more details.
 
-### Added Back
-
--
-
 ### Changed
 
 - Trying to access a ShapeClass instance outside of ShapeFactory will now throw an error.
@@ -68,10 +66,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Changed the way events are set for custom behavior.
 - getShapePositions is now the only way to get a shape's positions.
 
-### Fixed
-
--
-
 ## [1.0.1] - released
 
 ### Added
@@ -79,17 +73,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added ability to add custom click callbacks for circles and markers.
 - Added ability to add custom cancel edit callbacks for circles and markers.
 
-### Added Back
-
--
-
 ### Changed
 
 - Made id random so it does not conflict with someone else's id.
-
-### Fixed
-
--
 
 ## [1.0.0] - released
 
