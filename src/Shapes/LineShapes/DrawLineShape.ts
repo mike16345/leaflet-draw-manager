@@ -70,13 +70,17 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
   }
 
   override stopDrawing() {
-    if (this.drawMode === DrawManagerMode.EDIT && this.currentShape) {
+    if (
+      this.drawMode === DrawManagerMode.EDIT &&
+      this.currentShape &&
+      !this.isCustomDashedArray
+    ) {
       this.setShapeOptions({
         ...this.currentShape.options,
-        fillOpacity: 0.2,
         dashArray: undefined,
       });
     }
+
     super.stopDrawing();
     this.removeDashedPolyline();
     this.vertices.clearAllVertices();
@@ -94,12 +98,14 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.featureGroup.addLayer(this.currentShape);
     this.latLngs = getShapePositions(shape);
     this.preEditLatLngs = structuredClone(this.latLngs);
-
-    this.setShapeOptions({
-      ...this.currentShape.options,
-      dashArray: "12,12",
-      fillOpacity: 0.3,
-    });
+    if (shape.options.dashArray) {
+      this.isCustomDashedArray = true;
+    } else {
+      this.setShapeOptions({
+        ...this.currentShape.options,
+        dashArray: "12,12",
+      });
+    }
 
     this.redrawShape();
     this.vertices.clearAllVertices();
@@ -133,11 +139,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.fireEvent("onDragVertex", [this.latLngs]);
   }
 
-  protected handleDragMidpointVertex(
-    e: any,
-    index: number,
-    insert = true
-  ): void {
+  protected handleDragMidpointVertex(e: any, index: number, insert = true): void {
     if (insert) this.latLngs.splice(index + 1, 0, e.latlng);
     else this.latLngs[index + 1] = e.latlng;
     this.redrawShape();
@@ -221,10 +223,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     if (!this.latLngs.length) return;
 
     this.removeDashedPolyline();
-    this.dashedPolyline.coordinates = [
-      this.latLngs.at(-1),
-      this.cursorPosition,
-    ];
+    this.dashedPolyline.coordinates = [this.latLngs.at(-1), this.cursorPosition];
     this.dashedPolyline.element = L.polyline(this.dashedPolyline.coordinates, {
       ...this.shapeOptions,
       className: "cursor-crosshair",

@@ -73,6 +73,7 @@ class DrawMarker extends DrawShape<L.Marker> {
   }
 
   editShape(marker: L.Marker) {
+    this.drawMode = DrawManagerMode.EDIT;
     this.currentShape = marker;
     this.shapeOptions = marker.options;
     this.isDraggable = true;

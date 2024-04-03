@@ -76,6 +76,8 @@ class DrawShape<T extends LeafletShape> {
    */
   protected midpointVertexIcon: L.Icon | L.DivIcon | null;
 
+  protected isCustomDashedArray: boolean;
+
   /**
    * Creates a new DrawShape instance.
    *
@@ -98,6 +100,7 @@ class DrawShape<T extends LeafletShape> {
     this.vertexIcon = null;
     this.midpointVertexIcon = null;
     this.isDraggable = false;
+    this.isCustomDashedArray = false;
   }
 
   protected static validateInstanceCall() {
