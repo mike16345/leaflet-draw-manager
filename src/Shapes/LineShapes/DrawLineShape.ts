@@ -242,6 +242,11 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
    */
   changeShapeAttribute(attribute: keyof PolylineOptions, value: any) {
     if (!this.currentShape) return;
+
+    if (attribute == "dashArray") {
+      this.isCustomDashedArray = true;
+    }
+
     this.currentShape.setStyle({
       ...this.currentShape.options,
       [attribute]: value,
