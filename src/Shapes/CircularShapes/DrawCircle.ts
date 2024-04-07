@@ -162,13 +162,16 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
   }
 
   protected setVerticesEvents() {
-    this.vertices.on("onDragVertexStart", this.events.onDragVertexStart);
+    this.vertices.on("onDragVertexStart", () => this.fireEvent("onDragVertexStart"));
     this.vertices.on("onDragVertex", this.handleDragVertex.bind(this));
-    this.vertices.on(
-      "onDragMidpointVertex",
-      this.handleDragMidpointVertex.bind(this)
+    this.vertices.on("onDragEndVertex", () =>
+      this.fireEvent("onDragEndVertex", [this.latLngs])
     );
-    this.vertices.on("onDragEndVertex", this.events.onDragEndVertex);
+    this.vertices.on("onDragCenterStart", () => this.fireEvent("onDragCenterStart"));
+    this.vertices.on("onDragCenter", this.handleDragMidpointVertex.bind(this));
+    this.vertices.on("onDragCenterEnd", () =>
+      this.fireEvent("onDragCenterEnd", [this.latLngs])
+    );
   }
 
   /**
