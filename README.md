@@ -28,7 +28,7 @@ _(Work in Progress)_
 
 ## What's New?
 
-View CHANGELOG: https://github.com/mike16345/leaflet-draw-manager/blob/v2.1.4/CHANGELOG.md
+View CHANGELOG: https://github.com/mike16345/leaflet-draw-manager/blob/main/CHANGELOG.md
 
 ## Basic Usage
 
