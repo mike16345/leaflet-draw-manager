@@ -58,7 +58,7 @@ class DrawCircularVertices extends DrawVertices {
 
     marker.on("dragstart", () => {
       this.handleTouchStart();
-      this.fireEvent("onDragMidpointVertexStart");
+      this.fireEvent("onDragCenterStart");
     });
 
     marker.on("drag", (e: any) => {
@@ -69,11 +69,11 @@ class DrawCircularVertices extends DrawVertices {
 
       this.latLngs[0] = targetLatLng;
       this.drawOuterVertex(newLatLng);
-      this.fireEvent("onDragMidpointVertex", [e]);
+      this.fireEvent("onDragCenter", [e]);
     });
 
     marker.on("dragend", (e: L.LeafletEvent) => {
-      this.fireEvent("onDragEndMidpointVertex");
+      this.fireEvent("onDragCenterEnd");
       this.handleTouchEnd();
     });
 
