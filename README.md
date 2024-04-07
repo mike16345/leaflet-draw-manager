@@ -12,6 +12,7 @@ _(Work in Progress)_
 ### Table of Contents
 
 - [tl;dr](#tldr)
+- [What's New?](#whats-new?)
 - [Basic Usage](#basic-usage)
 - [Classes](#classes)
 - [Custom Event Handlers](#custom-event-handlers)
@@ -24,6 +25,10 @@ _(Work in Progress)_
 - Instantiate ShapeFactory: `const shapeFactory = ShapeFactory.getInstance()`.
 - Instantiate any class: `const drawPolygon = shapeFactory.getPolygonInstance(map, featureGroup, shapeOptions)`.
 - Start drawing: `drawPolygon.startDrawing()`.
+
+## What's New?
+
+View CHANGELOG: https://github.com/mike16345/leaflet-draw-manager/blob/v2.1.4/CHANGELOG.md
 
 ## Basic Usage
 
