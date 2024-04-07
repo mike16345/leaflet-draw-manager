@@ -149,6 +149,7 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
       this.vertices.setLatLngs = structuredClone(this.latLngs);
       this.vertices.drawVertices();
       this.vertices.drawMidpointVertices();
+      this.fireEvent("onDragCenterEnd", [this.latLngs]);
 
       if (this.drawMode !== DrawManagerMode.DRAW) return;
       if (!this.isTouchDevice) {
@@ -160,8 +161,6 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
         this.initDrawEvents();
         this.vertices.initDrawEvents();
       }, 50);
-
-      this.fireEvent("onDragCenterEnd", [this.latLngs]);
     });
 
     this.dragMarker = marker;
