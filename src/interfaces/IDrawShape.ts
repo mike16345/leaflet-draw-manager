@@ -32,6 +32,9 @@ interface IDrawManagerEvents {
   onDragMidpointVertexStart?: Function | null;
   onDragMidpointVertex?: Function | null;
   onDragEndMidpointVertex?: Function | null;
+  onDragCenterStart?: Function | null;
+  onDragCenter?: Function | null;
+  onDragCenterEnd?: Function | null;
 }
 
 export { IDrawShape, IDrawVertices, IDrawManagerEvents };
