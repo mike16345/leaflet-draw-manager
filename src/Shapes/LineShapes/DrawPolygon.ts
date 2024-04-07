@@ -109,12 +109,14 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
         }),
     };
 
-    var marker = L.marker(polygonCenter, MarkerOptions).addTo(this.featureGroup);
+    const marker = L.marker(polygonCenter, MarkerOptions).addTo(this.featureGroup);
+
     marker.on("dragstart", (e) => {
       this.isDraggingCenterMarker = true;
       this.vertices.clearAllVertices();
       this.disableDrawEvents();
       this.removeDashedPolyline();
+      this.fireEvent("onDragCenterStart");
     });
 
     // When the marker is dragged, update the polygon's position
@@ -134,9 +136,9 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
 
       // Set the new polygon position
       this.latLngs = latlngs;
+      this.fireEvent("onDragCenter", [this.latLngs]);
 
       this.redrawShape();
-      this.fireEvent("onEdit", [this.latLngs]);
 
       // Update the polygon center
       polygonCenter = markerLatLng;
@@ -147,16 +149,19 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
       this.vertices.setLatLngs = structuredClone(this.latLngs);
       this.vertices.drawVertices();
       this.vertices.drawMidpointVertices();
-      this.fireEvent("onEdit", [this.latLngs]);
 
       if (this.drawMode !== DrawManagerMode.DRAW) return;
-      this.cursorPosition = event.target._latlng;
-      this.drawDashedPolyline();
+      if (!this.isTouchDevice) {
+        this.cursorPosition = event.target._latlng;
+        this.drawDashedPolyline();
+      }
 
       setTimeout(() => {
         this.initDrawEvents();
         this.vertices.initDrawEvents();
       }, 50);
+
+      this.fireEvent("onDragCenterEnd", [this.latLngs]);
     });
 
     this.dragMarker = marker;

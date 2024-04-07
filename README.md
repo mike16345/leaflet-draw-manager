@@ -12,6 +12,7 @@ _(Work in Progress)_
 ### Table of Contents
 
 - [tl;dr](#tldr)
+- [What's New?](#whats-new?)
 - [Basic Usage](#basic-usage)
 - [Classes](#classes)
 - [Custom Event Handlers](#custom-event-handlers)
@@ -24,6 +25,10 @@ _(Work in Progress)_
 - Instantiate ShapeFactory: `const shapeFactory = ShapeFactory.getInstance()`.
 - Instantiate any class: `const drawPolygon = shapeFactory.getPolygonInstance(map, featureGroup, shapeOptions)`.
 - Start drawing: `drawPolygon.startDrawing()`.
+
+## What's New?
+
+View CHANGELOG: https://github.com/mike16345/leaflet-draw-manager/blob/v2.1.4/CHANGELOG.md
 
 ## Basic Usage
 
@@ -287,3 +292,6 @@ Here are a list of some functions/enums/interfaces that can be helpful while dev
 | `onEditStart`               | Fired when editShape(shapeToEdit) method is called. No parameters are provided.                                                                  | `shapeInstance.on("onEditStart", () => { /* Your code here */ });`                              |
 | `onEdit`                    | Fired when the coordinates of the shape are changed . The updated coordinates are provided.                                                      | `shapeInstance.on("onEdit", (latLngs:LatLng[]) => { /_ Your code here _/ });`                   |
 | `onCancelEdit`              | Fired when the cancelEdit() method is called. The shape object after the canceled edit is provided as a parameter.                               | `shapeInstance.on("onCancelEdit", (shape: LeafletShape \| null) => { /* Your code here */ });`  |
+| `onDragCenterStart`         | Fired when the center of a polygon/circle is being dragged. No parameters are provided.                                                          | `shapeInstance.on("onDragCenterStart", () => { /* Your code here */ });`                        |
+| `onDragCenter`              | Fired continuously while user is dragging the center of a polygon/circle of the shape. The updated coordinates of the shape are provided.        | `shapeInstance.on("onDragMidpointVertex", (latlngs: LatLng[]) => { /* Your code here */ });`    |
+| `onDragCenterEnd`           | Fired when user stops dragging the center of a polygon/circle of the shape. The updated coordinates of the shape are provided.                   | `shapeInstance.on("onDragMidpointVertex", (latlngs: LatLng[]) => { /* Your code here */ });`    |

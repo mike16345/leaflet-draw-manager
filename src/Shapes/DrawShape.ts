@@ -75,7 +75,7 @@ class DrawShape<T extends LeafletShape> {
    * Icon for midpoint vertices that are used when drawing/editing a shape.
    */
   protected midpointVertexIcon: L.Icon | L.DivIcon | null;
-
+  
   protected isCustomDashedArray: boolean;
 
   /**

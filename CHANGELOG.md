@@ -5,11 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.4] - released
+
+### Added
+
+- Added more events for dragging center of polygon/circle
+
 ## [2.1.2] - released
 
 ### Added
 
-- Option to disable delete dashed polyline on finish edit. 
+- Option to disable delete dashed polyline on finish edit.
 
 ### Changed
 
