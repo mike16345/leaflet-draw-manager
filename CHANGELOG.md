@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.6] - released
+
+### Fixed
+
+- Display distances after dragging a polygon does not throw an exception anymore.
+
 ## [2.1.5] - released
 
 ### Fixed

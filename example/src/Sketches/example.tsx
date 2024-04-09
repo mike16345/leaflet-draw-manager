@@ -1,4 +1,4 @@
-import { FaMapMarkerAlt, FaCheck, FaEraser, FaUndo } from "react-icons/fa";
+import { FaMapMarkerAlt, FaCheck, FaEraser, FaUndo, FaEye } from "react-icons/fa";
 import { MdOutlinePolyline } from "react-icons/md";
 import { PiFlowArrowBold } from "react-icons/pi";
 import { RiSketching } from "react-icons/ri";
@@ -45,6 +45,7 @@ const SketchesToolbar = () => {
   const shapeFactory = ShapeFactory.getInstance(shapeClassConfig);
   const [sketchType, setSketchType] = useState<Shapes | null>(null);
   const [openToolbar, setOpenToolBar] = useState(false);
+  const [showDistance, setShowDistance] = useState(false);
 
   const drawTypes = [
     { type: "polygon", icon: <TbPolygon size={28} /> },
@@ -189,6 +190,12 @@ const SketchesToolbar = () => {
     setSketchType(null);
   };
 
+  const handleShowDistances = () => {
+    if (!(ShapeFactory.shapeInstance instanceof DrawLineShape)) return;
+    ShapeFactory.shapeInstance.displayLineDistances(!showDistance);
+    setShowDistance((show) => !show);
+  };
+
   useEffect(() => {
     // There is a bug that when clicking on an element on the map the map still captures the click.
     // This prevents that extra click.
@@ -239,6 +246,12 @@ const SketchesToolbar = () => {
                     <FaUndo size={28} />
                   </button>
                 )}
+              <button
+                className="rounded-xl font-bold border bg-black/70 p-2 text-white"
+                onClick={handleShowDistances}
+              >
+                <FaEye size={28} />
+              </button>
             </>
           )}
           {!(

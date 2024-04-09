@@ -158,7 +158,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
   setLatLngs(latLngs: LatLng[]): void {
     this.latLngs = latLngs;
     this.vertices.clearAllVertices();
-    this.vertices.setLatLngs = structuredClone(latLngs);
+    this.vertices.setLatLngs = [...latLngs];
     this.vertices.drawVertices();
     this.vertices.drawMidpointVertices();
     this.redrawShape();

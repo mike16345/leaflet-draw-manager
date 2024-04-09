@@ -3,6 +3,7 @@ import { DrawManagerMode } from "../../enums/DrawManagerMode";
 import { Shapes } from "../../enums/Shapes";
 import { IDrawManagerEvents } from "../../interfaces/IDrawShape";
 import L, { DivIcon, Icon } from "leaflet";
+import { convertToLatLngInstances } from "../../utils/shapeUtils";
 
 /**
  * A class for drawing polygons on a map.
@@ -135,7 +136,7 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
       }
 
       // Set the new polygon position
-      this.latLngs = latlngs;
+      this.latLngs = convertToLatLngInstances(latlngs);
       this.fireEvent("onDragCenter", [this.latLngs]);
 
       this.redrawShape();
@@ -146,7 +147,7 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
 
     marker.on("dragend", (event) => {
       this.isDraggingCenterMarker = false;
-      this.vertices.setLatLngs = structuredClone(this.latLngs);
+      this.vertices.setLatLngs = this.latLngs;
       this.vertices.drawVertices();
       this.vertices.drawMidpointVertices();
       this.fireEvent("onDragCenterEnd", [this.latLngs]);
