@@ -16,10 +16,10 @@ const getShapePositions = (shape: LeafletShape) => {
   }
 };
 
-const convertToLatLngInstances = (latlngs: { lat: number; lng: number }[]) => {
-  return latlngs.map((latlng) => {
-    return new LatLng(latlng.lat, latlng.lng);
-  });
+const convertToLatLngInstances = (
+  latlngs: { lat: number; lng: number; alt?: number }[]
+) => {
+  return latlngs.map((latlng) => new LatLng(latlng.lat, latlng.lng, latlng?.alt));
 };
 
 export { convertToLatLngInstances, getShapePositions };

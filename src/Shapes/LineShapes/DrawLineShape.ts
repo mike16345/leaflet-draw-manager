@@ -4,7 +4,7 @@ import { DrawManagerMode } from "../../enums/DrawManagerMode";
 import { Shapes } from "../../enums/Shapes";
 import { IDrawManagerEvents, IDrawShape } from "../../interfaces/IDrawShape";
 import { DrawLineVertices } from "../../Vertices/DrawLineVertices";
-import { getShapePositions } from "../../utils/shapeUtils";
+import { convertToLatLngInstances, getShapePositions } from "../../utils/shapeUtils";
 
 class DrawLineShape<T extends L.Polygon | L.Polyline>
   extends DrawShape<T>
@@ -62,7 +62,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
   }
 
   cancelEdit() {
-    this.latLngs = structuredClone(this.preEditLatLngs);
+    this.latLngs = convertToLatLngInstances(this.preEditLatLngs);
     this.redrawShape();
     this.fireEvent("onCancelEdit", [this.currentShape]);
     this.off("onFinish");
@@ -97,7 +97,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.currentShape = shape;
     this.featureGroup.addLayer(this.currentShape);
     this.latLngs = getShapePositions(shape);
-    this.preEditLatLngs = structuredClone(this.latLngs);
+    this.preEditLatLngs = convertToLatLngInstances(this.latLngs);
     if (shape.options.dashArray) {
       this.isCustomDashedArray = true;
     } else {
@@ -109,7 +109,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
 
     this.redrawShape();
     this.vertices.clearAllVertices();
-    this.vertices.setLatLngs = structuredClone(this.latLngs);
+    this.vertices.setLatLngs = convertToLatLngInstances(this.latLngs);
     this.setVerticesEvents();
     this.vertices.drawVertices();
     this.vertices.drawMidpointVertices();

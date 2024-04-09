@@ -123,7 +123,7 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
     // When the marker is dragged, update the polygon's position
     marker.on("drag", (event) => {
       var markerLatLng = event.target.getLatLng();
-      var latlngs = structuredClone(this.latLngs);
+      var latlngs = convertToLatLngInstances(this.latLngs);
 
       // Calculate the offset between the marker's new position and the original polygon center
       var offsetLat = markerLatLng.lat - polygonCenter.lat;
@@ -147,7 +147,7 @@ class DrawPolygon extends DrawLineShape<L.Polygon> {
 
     marker.on("dragend", (event) => {
       this.isDraggingCenterMarker = false;
-      this.vertices.setLatLngs = this.latLngs;
+      this.vertices.setLatLngs = convertToLatLngInstances(this.latLngs);
       this.vertices.drawVertices();
       this.vertices.drawMidpointVertices();
       this.fireEvent("onDragCenterEnd", [this.latLngs]);
