@@ -1,6 +1,6 @@
 {
   "name": "leaflet-draw-manager",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "Singleton based class designed to handle drawing shapes on a map manually.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
