@@ -4,7 +4,10 @@ import { DrawManagerMode } from "../../enums/DrawManagerMode";
 import { Shapes } from "../../enums/Shapes";
 import { IDrawManagerEvents, IDrawShape } from "../../interfaces/IDrawShape";
 import { DrawLineVertices } from "../../Vertices/DrawLineVertices";
-import { convertToLatLngInstances, getShapePositions } from "../../utils/shapeUtils";
+import {
+  convertToLatLngInstances,
+  getShapePositions,
+} from "../../utils/shapeUtils";
 
 class DrawLineShape<T extends L.Polygon | L.Polyline>
   extends DrawShape<T>
@@ -139,7 +142,11 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     this.fireEvent("onDragVertex", [this.latLngs]);
   }
 
-  protected handleDragMidpointVertex(e: any, index: number, insert = true): void {
+  protected handleDragMidpointVertex(
+    e: any,
+    index: number,
+    insert = true
+  ): void {
     if (insert) this.latLngs.splice(index + 1, 0, e.latlng);
     else this.latLngs[index + 1] = e.latlng;
     this.redrawShape();
@@ -223,7 +230,10 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
     if (!this.latLngs.length) return;
 
     this.removeDashedPolyline();
-    this.dashedPolyline.coordinates = [this.latLngs.at(-1), this.cursorPosition];
+    this.dashedPolyline.coordinates = [
+      this.latLngs.at(-1),
+      this.cursorPosition,
+    ];
     this.dashedPolyline.element = L.polyline(this.dashedPolyline.coordinates, {
       ...this.shapeOptions,
       className: "cursor-crosshair",
@@ -236,7 +246,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
   }
 
   /**
-   * Sets the value of a shape attribute.
+   * Changes the value of a shape attribute.
    * @param attribute The name of the shape attribute to change.
    * @param value The new value of the shape attribute.
    */
@@ -247,10 +257,19 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
       this.isCustomDashedArray = true;
     }
 
+    if (this.dashedPolyline && attribute == "color") {
+      this.dashedPolyline.element.setStyle({
+        ...this.dashedPolyline.element.options,
+        [attribute]: value,
+      });
+    }
+
     this.currentShape.setStyle({
       ...this.currentShape.options,
       [attribute]: value,
     });
+
+    this.shapeOptions = this.currentShape.options;
   }
 
   /**

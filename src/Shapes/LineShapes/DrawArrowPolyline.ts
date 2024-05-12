@@ -1,7 +1,7 @@
 import { LineString, MultiLineString } from "geojson";
 import { Shapes } from "../../enums/Shapes";
 import { DrawLineShape } from "./DrawLineShape";
-import L, { PathOptions } from "leaflet";
+import L, { PathOptions, PolylineOptions } from "leaflet";
 import "leaflet-polylinedecorator";
 import { DrawShape } from "../DrawShape";
 
@@ -49,11 +49,10 @@ class DrawArrowPolyline extends DrawLineShape<L.Polyline> {
   }
 
   editShape(shape: L.Polyline<LineString | MultiLineString, any>) {
-    super.editShape(shape);
     if (shape.arrowHead) {
-      this.map.removeLayer(shape.arrowHead);
+      this.arrowHead = shape.arrowHead;
     }
-    this.drawArrowHeadToPolyline();
+    super.editShape(shape);
 
     return this.currentShape!;
   }
@@ -81,7 +80,6 @@ class DrawArrowPolyline extends DrawLineShape<L.Polyline> {
 
   redrawShape() {
     super.redrawShape();
-
     return this.drawArrowHeadToPolyline();
   }
 
@@ -92,7 +90,7 @@ class DrawArrowPolyline extends DrawLineShape<L.Polyline> {
 
   deleteArrowHead() {
     if (this.arrowHead) {
-      this.featureGroup.removeLayer(this.arrowHead);
+      this.map.removeLayer(this.arrowHead);
       this.arrowHead = null;
     }
   }
@@ -124,6 +122,17 @@ class DrawArrowPolyline extends DrawLineShape<L.Polyline> {
     this.currentShape.arrowHead = arrowHead;
 
     return this.currentShape;
+  }
+
+  /**
+   * Sets the value of a shape attribute.
+   * @param attribute The name of the shape attribute to change.
+   * @param value The new value of the shape attribute.
+   */
+  changeShapeAttribute(attribute: keyof PolylineOptions, value: any) {
+    super.changeShapeAttribute(attribute, value);
+    if (!this.arrowHead || attribute !== "color") return;
+    this.arrowHead.setStyle({ [attribute]: value });
   }
 
   /**
