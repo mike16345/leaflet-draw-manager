@@ -1,4 +1,10 @@
-import { Circle, FeatureGroup, LatLng, LeafletMouseEvent } from "leaflet";
+import {
+  Circle,
+  CircleOptions,
+  FeatureGroup,
+  LatLng,
+  LeafletMouseEvent,
+} from "leaflet";
 import { DrawShape } from "../DrawShape";
 import { IDrawManagerEvents, IDrawShape } from "../../interfaces/IDrawShape";
 import { DrawManagerMode } from "../../enums/DrawManagerMode";
@@ -162,12 +168,16 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
   }
 
   protected setVerticesEvents() {
-    this.vertices.on("onDragVertexStart", () => this.fireEvent("onDragVertexStart"));
+    this.vertices.on("onDragVertexStart", () =>
+      this.fireEvent("onDragVertexStart")
+    );
     this.vertices.on("onDragVertex", this.handleDragVertex.bind(this));
     this.vertices.on("onDragEndVertex", () =>
       this.fireEvent("onDragEndVertex", [this.latLngs])
     );
-    this.vertices.on("onDragCenterStart", () => this.fireEvent("onDragCenterStart"));
+    this.vertices.on("onDragCenterStart", () =>
+      this.fireEvent("onDragCenterStart")
+    );
     this.vertices.on("onDragCenter", this.handleDragMidpointVertex.bind(this));
     this.vertices.on("onDragCenterEnd", () =>
       this.fireEvent("onDragCenterEnd", [this.latLngs])
@@ -273,7 +283,9 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
 
     switch (this.drawMode) {
       case DrawManagerMode.STOP:
-        radius = this.latLngs[this.latLngs.length - 1].distanceTo(this.latLngs[0]);
+        radius = this.latLngs[this.latLngs.length - 1].distanceTo(
+          this.latLngs[0]
+        );
         break;
       case DrawManagerMode.EDIT:
         if (this.latLngs[1]) {
@@ -315,7 +327,8 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
     var radiusVertex = new LatLng(
       circleCenter.lat,
       circleCenter.lng +
-        radius / (LATITUDE_FACTOR * Math.cos(circleCenter.lat * (Math.PI / 180))) // Longitude calculation
+        radius /
+          (LATITUDE_FACTOR * Math.cos(circleCenter.lat * (Math.PI / 180))) // Longitude calculation
     );
 
     return radiusVertex;
@@ -355,6 +368,28 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
       this.map.off("click", this.handleMapClick.bind(this));
       this.map.off("mousemove", this.handleMapMouseMove.bind(this));
     }
+  }
+
+  /**
+   * Changes the attribute of the current shape.
+   *
+   * @param attribute - The attribute to change. It should be a key of CircleOptions.
+   * @param value - The new value for the attribute.
+   *
+   * @returns {void}
+   *
+   * @throws Will throw an error if there is no current shape.
+   *
+   * @example
+   * ```typescript
+   * // Change the fill color of the current circle to red
+   * drawCircle.changeShapeAttribute('fillColor', 'red');
+   * ```
+   */
+  changeShapeAttribute(attribute: keyof CircleOptions, value: any): void {
+    if (!this.currentShape) return;
+    this.currentShape.setStyle({ [attribute]: value });
+    this.shapeOptions = this.currentShape.options;
   }
 
   override setVertexIcon(vertexIcon: L.Icon<L.IconOptions> | L.DivIcon): void {
