@@ -257,7 +257,7 @@ class DrawLineShape<T extends L.Polygon | L.Polyline>
       this.isCustomDashedArray = true;
     }
 
-    if (this.dashedPolyline && attribute == "color") {
+    if (this.dashedPolyline.element && attribute == "color") {
       this.dashedPolyline.element.setStyle({
         ...this.dashedPolyline.element.options,
         [attribute]: value,
