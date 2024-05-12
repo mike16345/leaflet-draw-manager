@@ -1,4 +1,10 @@
-import { FaMapMarkerAlt, FaCheck, FaEraser, FaUndo, FaEye } from "react-icons/fa";
+import {
+  FaMapMarkerAlt,
+  FaCheck,
+  FaEraser,
+  FaUndo,
+  FaEye,
+} from "react-icons/fa";
 import { MdOutlinePolyline } from "react-icons/md";
 import { PiFlowArrowBold } from "react-icons/pi";
 import { RiSketching } from "react-icons/ri";
@@ -36,6 +42,7 @@ import {
 } from "../../../src/index";
 import { shapeClassConfig } from "../ShapeConfig";
 import { FcCancel } from "react-icons/fc";
+import { BiColor } from "react-icons/bi";
 
 const SketchesToolbar = () => {
   const map = useMap();
@@ -95,6 +102,10 @@ const SketchesToolbar = () => {
 
         return markerInstance;
     }
+  };
+
+  const handleChangeColor = () => {
+      ShapeFactory.shapeInstance.changeShapeAttribute("color", "black");
   };
 
   const handleConfirmDraw = () => {
@@ -207,33 +218,31 @@ const SketchesToolbar = () => {
     <div ref={divRef} className="absolute top-12 right-12 p-2 z-[450]">
       <button
         className="rounded-xl font-bold border bg-black/70 p-2  text-white"
-        onClick={() => setOpenToolBar((open) => !open)}
-      >
+        onClick={() => setOpenToolBar((open) => !open)}>
         <RiSketching size={28} />
       </button>
 
       {(openToolbar || sketchType !== null) && (
         <div className="flex flex-col space-y-2">
-          {(ShapeFactory.shapeInstance?.getDrawMode() === DrawManagerMode.EDIT ||
+          {(ShapeFactory.shapeInstance?.getDrawMode() ===
+            DrawManagerMode.EDIT ||
             sketchType) && (
             <>
               <button
                 className="rounded-xl font-bold border bg-black/70 p-2 mt-2"
-                onClick={handleConfirmDraw}
-              >
+                onClick={handleConfirmDraw}>
                 <FaCheck className="text-green-400" size={28} />
               </button>
               <button
                 className="rounded-xl font-bold border bg-black/70 p-2"
-                onClick={handleDeleteDraw}
-              >
+                onClick={handleDeleteDraw}>
                 <FaEraser className="text-red-400" size={28} />
               </button>
-              {ShapeFactory.shapeInstance?.getDrawMode() == DrawManagerMode.EDIT && (
+              {ShapeFactory.shapeInstance?.getDrawMode() ==
+                DrawManagerMode.EDIT && (
                 <button
                   className="rounded-xl font-bold border bg-black/70 p-2 text-white"
-                  onClick={handleCancelEdit}
-                >
+                  onClick={handleCancelEdit}>
                   <FcCancel size={28} />
                 </button>
               )}
@@ -241,22 +250,25 @@ const SketchesToolbar = () => {
                 ShapeFactory.shapeInstance instanceof DrawLineShape && (
                   <button
                     className="rounded-xl font-bold border bg-black/70 p-2 text-white"
-                    onClick={handleUndoClick}
-                  >
+                    onClick={handleUndoClick}>
                     <FaUndo size={28} />
                   </button>
                 )}
               <button
                 className="rounded-xl font-bold border bg-black/70 p-2 text-white"
-                onClick={handleShowDistances}
-              >
+                onClick={handleShowDistances}>
                 <FaEye size={28} />
+              </button>
+              <button
+                className="rounded-xl font-bold border bg-black/70 p-2 text-white"
+                onClick={handleChangeColor}>
+                <BiColor size={28} />
               </button>
             </>
           )}
           {!(
-            ShapeFactory.shapeInstance?.getDrawMode() === DrawManagerMode.EDIT ||
-            sketchType
+            ShapeFactory.shapeInstance?.getDrawMode() ===
+              DrawManagerMode.EDIT || sketchType
           ) &&
             drawTypes.map((drawType, index) => (
               <button
@@ -264,8 +276,7 @@ const SketchesToolbar = () => {
                 onClick={() => handleStartDrawing(drawType.type as Shapes)}
                 className={`rounded-xl ${
                   index === 0 && "mt-2"
-                } font-bold p-2 bg-black/70 text-white`}
-              >
+                } font-bold p-2 bg-black/70 text-white`}>
                 {drawType.icon}
               </button>
             ))}
