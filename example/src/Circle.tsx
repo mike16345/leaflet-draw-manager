@@ -19,7 +19,7 @@ const CirclesInMap = () => {
       circleOptions
     );
     drawCircle.current.startDrawing();
-    drawCircle.current.setCustomOnFinishHandler((circle: Circle | null) => {
+    drawCircle.current.on("onFinish",(circle: Circle | null) => {
       latestCircle.current = circle;
     });
   };
@@ -28,7 +28,7 @@ const CirclesInMap = () => {
     if (!drawCircle.current || !latestCircle.current) return;
 
     drawCircle.current.editShape(latestCircle.current);
-  };
+  };``
 
   const handleDeleteCircle = () => {
     if (!drawCircle.current) return;

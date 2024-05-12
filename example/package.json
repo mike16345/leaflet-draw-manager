@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@splidejs/react-splide": "^0.7.12",
-    "leaflet-draw-manager": "^1.0.1",
+    "leaflet-draw-manager": "^2.1.7",
     "leaflet-polylinedecorator": "^1.6.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

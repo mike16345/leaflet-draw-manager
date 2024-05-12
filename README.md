@@ -79,11 +79,11 @@ import { ShapeFactory, DrawCircle } from "leaflet-draw-manager";
 
 const CirclesInMap = () => {
   const map = useMap();
-  const circleGroup = useRef < L.FeatureGroup > null;
+  const circleGroup = useRef<L.FeatureGroup>(null);
   const circleOptions: CircleOptions = { color: "red", radius: 0 };
   const shapeFactory = ShapeFactory.getInstance();
-  const drawCircle = (useRef < DrawCircle) | (null > null);
-  const latestCircle = (useRef < Circle) | (null > null);
+  const drawCircle = useRef<DrawCircle | null>(null);
+  const latestCircle = useRef<Circle | null>(null);
 
   const handleDrawCircle = () => {
     if (!circleGroup.current) return;
@@ -93,7 +93,7 @@ const CirclesInMap = () => {
       circleOptions
     );
     drawCircle.current.startDrawing();
-    drawCircle.current.setCustomOnFinishHandler((circle: Circle | null) => {
+    drawCircle.current.on("onFinish",(circle: Circle | null) => {
       latestCircle.current = circle;
     });
   };
@@ -102,7 +102,7 @@ const CirclesInMap = () => {
     if (!drawCircle.current || !latestCircle.current) return;
 
     drawCircle.current.editShape(latestCircle.current);
-  };
+  };``
 
   const handleDeleteCircle = () => {
     if (!drawCircle.current) return;
@@ -230,9 +230,10 @@ DrawPolygon/DrawPolyline/DrawArrowPolyline all inherit these methods from the Dr
 
 #### DrawPolyline
 
-| Method | Description | Example |
+| Method                                                                                                       | Description                                                                                | Example                                                                         |
+| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| `static drawTransparentPolyline(latLngs:LatLng[])` | Creates a transparent polyline based on the provided set of LatLng coordinates. The transparent polyline has a weight of 40. This can be used to help capture clicks on a polyline if given the same coordinates. | `DrawPolyline.drawTransparentPolyline(coordinates)` |
 
-| `drawTransparentPolyline(latLngs:LatLng[])` | Creates a transparent polyline based on the provided set of LatLng coordinates. The transparent polyline has a weight of 40. This can be used to help capture clicks on a polyline if given the same coordinates. /| ` DrawPolyline.drawTransparentPolyline(coordinates)`
 
 ### DrawCircle
 

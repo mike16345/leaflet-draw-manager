@@ -1,6 +1,5 @@
 import "./App.css";
 import { MapContainer, TileLayer } from "react-leaflet";
-import CirclesInMap from "./Circle";
 import SketchesToolbar from "./Sketches/example";
 
 function App() {

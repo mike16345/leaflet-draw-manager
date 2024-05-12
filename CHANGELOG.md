@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [2.1.7] - released
+
+### Added 
+
+- Added ability to change circle attributes.
+
+### Fixed
+
+- Fixed issue where editing an arrow polyline would create an extra arrow.
+- Fixed issue where the arrow color would not get updated when changing arrow polyline color.
+- Fixed issue where the color of the dashed polyline would not get updated when changing a LineShape's color.
+
+
 ## [2.1.6] - released
 
 ### Fixed
