@@ -389,7 +389,7 @@ class DrawCircle extends DrawShape<L.Circle> implements IDrawShape<L.Circle> {
   changeShapeAttribute(attribute: keyof CircleOptions, value: any): void {
     if (!this.currentShape) return;
     this.currentShape.setStyle({ [attribute]: value });
-    this.shapeOptions = this.currentShape.options;
+    this.shapeOptions = this.currentShape.options as CircleOptions;
   }
 
   override setVertexIcon(vertexIcon: L.Icon<L.IconOptions> | L.DivIcon): void {

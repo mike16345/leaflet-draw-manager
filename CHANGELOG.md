@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [2.1.7] - released
+## [2.1.8] - released
 
 ### Added 
 
@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed issue where the color of the dashed polyline would not get updated when changing a LineShape's color.
 
 
-## [2.1.6] - released
+## [2.1.6] - released as 2.1.7 on NPM
 
 ### Fixed
 
